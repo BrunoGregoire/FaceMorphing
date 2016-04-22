@@ -61,6 +61,9 @@ public slots:
     void TextureButtonPressed();
     void ImportAllButtonPressed();
     void LoadKeypointsButtonPressed();
+    void ExportModelButtonPressed();
+    void ExportBsButtonPressed();
+    void ExportAllButtonPressed();
     //void SavePointButtonPressed();
     void AlignButtonPressed();
     void ToggleVisibilityButtonPressed();

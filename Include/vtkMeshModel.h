@@ -29,9 +29,13 @@ public:
 
     vtkSmartPointer<vtkOBBTree> obbTree;
 
+    std::vector<std::string> bsNames;
+    std::vector<vtkSmartPointer<vtkPolyData>> blendshapes;
+
     vtkMeshModel();
 
     void ReadFromOBJ(std::string fileName);
+    void ExportAsOBJ(std::string fileName);
     void ReadTexture(std::string fileName);
     void Texture(vtkSmartPointer<vtkTexture> _texture);
     void ScaleWith(vtkMeshModel* otherMesh);
@@ -40,6 +44,10 @@ public:
     vtkMeshModel* Copy();
     void ComputeAxisTransform();
     double* TransformAlongAxis(double* point);
+    void LoadBlendshapes(std::string folderPath);
+    void TransformBlendshapes(vtkSmartPointer<vtkAbstractTransform> transform);
+    void ExportBlendshapes(std::string folderPath);
+    void TextureBlendshapes();
 };
 
 #endif

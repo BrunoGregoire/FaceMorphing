@@ -8,6 +8,7 @@ Initializer::Initializer()
     texturer = new Texturer();
     raycaster = new Raycaster();
     faceDetector = new FaceDetector("Resources/shape_predictor_68_face_landmarks.dat");
+    drawer = new Drawer();
 }
 
 void Initializer::Init()
@@ -29,7 +30,84 @@ void Initializer::Init()
     content->refModel->SetRenderWindow(content->refRenderWindow);
     content->refModel->ShowModel();
 
+    // INIT REF BLENDSHAPES
+    content->refModel->bsNames.push_back("BrowsD_L");
+    content->refModel->bsNames.push_back("BrowsD_R");
+    content->refModel->bsNames.push_back("BrowsSqueeze_L");
+    content->refModel->bsNames.push_back("BrowsSqueeze_R");
+    content->refModel->bsNames.push_back("BrowsU_C_L");
+    content->refModel->bsNames.push_back("BrowsU_C_R");
+    content->refModel->bsNames.push_back("BrowsU_L");
+    content->refModel->bsNames.push_back("BrowsU_R");
+    content->refModel->bsNames.push_back("CheekSquint_L");
+    content->refModel->bsNames.push_back("CheekSquint_R");
+    content->refModel->bsNames.push_back("ChinLowerRaise");
+    content->refModel->bsNames.push_back("ChinUpperRaise");
+    content->refModel->bsNames.push_back("EyeBlink_L");
+    content->refModel->bsNames.push_back("EyeBlink_R");
+    content->refModel->bsNames.push_back("EyeDown_L");
+    content->refModel->bsNames.push_back("EyeDown_R");
+    content->refModel->bsNames.push_back("EyeIn_L");
+    content->refModel->bsNames.push_back("EyeIn_R");
+    content->refModel->bsNames.push_back("EyeOpen_L");
+    content->refModel->bsNames.push_back("EyeOpen_R");
+    content->refModel->bsNames.push_back("EyeOut_L");
+    content->refModel->bsNames.push_back("EyeOut_R");
+    content->refModel->bsNames.push_back("EyeSquint_L");
+    content->refModel->bsNames.push_back("EyeSquint_R");
+    content->refModel->bsNames.push_back("EyeUp_L");
+    content->refModel->bsNames.push_back("EyeUp_R");
+    content->refModel->bsNames.push_back("JawBackward");
+    content->refModel->bsNames.push_back("JawChew");
+    content->refModel->bsNames.push_back("JawFwd");
+    content->refModel->bsNames.push_back("JawLeft");
+    content->refModel->bsNames.push_back("JawOpen");
+    content->refModel->bsNames.push_back("JawRight");
+    content->refModel->bsNames.push_back("LipsFunnel_L");
+    content->refModel->bsNames.push_back("LipsFunnel_R");
+    content->refModel->bsNames.push_back("LipsLowerClose");
+    content->refModel->bsNames.push_back("LipsLowerDown_L");
+    content->refModel->bsNames.push_back("LipsLowerDown_R");
+    content->refModel->bsNames.push_back("LipsLowerOpen");
+    content->refModel->bsNames.push_back("LipsPucker_L");
+    content->refModel->bsNames.push_back("LipsPucker_R");
+    content->refModel->bsNames.push_back("LipsStretch_L");
+    content->refModel->bsNames.push_back("LipsStretch_R");
+    content->refModel->bsNames.push_back("LipsTogether");
+    content->refModel->bsNames.push_back("LipsTowards_L");
+    content->refModel->bsNames.push_back("LipsTowards_R");
+    content->refModel->bsNames.push_back("LipsUpperClose");
+    content->refModel->bsNames.push_back("LipsUpperOpen");
+    content->refModel->bsNames.push_back("LipsUpperUp_L");
+    content->refModel->bsNames.push_back("LipsUpperUp_R");
+    content->refModel->bsNames.push_back("MouthDimple_L");
+    content->refModel->bsNames.push_back("MouthDimple_R");
+    content->refModel->bsNames.push_back("MouthDown");
+    content->refModel->bsNames.push_back("MouthFrown_L");
+    content->refModel->bsNames.push_back("MouthFrown_R");
+    content->refModel->bsNames.push_back("MouthLeft");
+    content->refModel->bsNames.push_back("MouthPress_L");
+    content->refModel->bsNames.push_back("MouthPress_R");
+    content->refModel->bsNames.push_back("MouthRight");
+    content->refModel->bsNames.push_back("MouthSharpCornerPull_L");
+    content->refModel->bsNames.push_back("MouthSharpCornerPull_R");
+    content->refModel->bsNames.push_back("MouthSmile_L");
+    content->refModel->bsNames.push_back("MouthSmile_R");
+    content->refModel->bsNames.push_back("MouthUp");
+    content->refModel->bsNames.push_back("NostrilContractor");
+    content->refModel->bsNames.push_back("NostrilDepress_L");
+    content->refModel->bsNames.push_back("NostrilDepress_R");
+    content->refModel->bsNames.push_back("NostrilDilator");
+    content->refModel->bsNames.push_back("Puff_L");
+    content->refModel->bsNames.push_back("Puff_R");
+    content->refModel->bsNames.push_back("Sneer_L");
+    content->refModel->bsNames.push_back("Sneer_R");
+    content->refModel->bsNames.push_back("Suck");
+
+    content->refModel->LoadBlendshapes("Models/Ref/BS/");
+
     // INIT REF KEYPOINTS NAMES
+    /*
     content->nbKeypoints = 19;
     content->keypointsNames = new std::string[content->nbKeypoints];
     content->keypointsNames[0] = "Select Left Eye Int Corner";
@@ -51,35 +129,13 @@ void Initializer::Init()
     content->keypointsNames[16] = "Select Left Ear Up";
     content->keypointsNames[17] = "Select Right Ear Down";
     content->keypointsNames[18] = "Select Right Ear Up";
+    */
 
     // INIT REF KEYPOINTS
     content->refKeypoints = new vtkGlyphModel(content->refModel);
     content->refKeypoints->LoadIDs("Resources/refKeypoints.txt");
     content->refKeypoints->ShowModel();
     content->refKeypoints->UpdateIdLabels();
-    /*
-    content->refKeypoints->InsertPointID(13349);
-    content->refKeypoints->InsertPointID(13360);
-    content->refKeypoints->InsertPointID(545);
-    content->refKeypoints->InsertPointID(13327);
-    content->refKeypoints->InsertPointID(27608);
-    content->refKeypoints->InsertPointID(27619);
-    content->refKeypoints->InsertPointID(14786);
-    content->refKeypoints->InsertPointID(27565);
-    content->refKeypoints->InsertPointID(10194);
-    content->refKeypoints->InsertPointID(7434);
-    content->refKeypoints->InsertPointID(24434);
-    content->refKeypoints->InsertPointID(6390);
-    content->refKeypoints->InsertPointID(5938);
-    content->refKeypoints->InsertPointID(20618);
-    content->refKeypoints->InsertPointID(10942);
-    content->refKeypoints->InsertPointID(8642);
-    content->refKeypoints->InsertPointID(533);
-    content->refKeypoints->InsertPointID(22882);
-    content->refKeypoints->InsertPointID(16483);
-    content->refKeypoints->UpdateGlyph();
-    content->refKeypoints->ShowModel();
-    */
 
     // INIT REF AXIS
     double* origin = new double[3];
@@ -132,6 +188,7 @@ void Initializer::InitNewModel(std::string fileName)
     style->SetTexturer(texturer);
     style->SetRaycaster(raycaster);
     style->SetFaceDetector(faceDetector);
+    style->SetDrawer(drawer);
     content->interactor->SetInteractorStyle(style);
     content->style = style;
 

@@ -24,12 +24,15 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
 
     actionExport_model = new QAction(MainWindow);
     actionExport_model->setObjectName(QStringLiteral("actionExport_model"));
+    QObject::connect(actionExport_model,SIGNAL(triggered()),this,SLOT(ExportModelButtonPressed()));
 
     actionExport_blend_shapes = new QAction(MainWindow);
     actionExport_blend_shapes->setObjectName(QStringLiteral("actionExport_blend_shapes"));
+    QObject::connect(actionExport_blend_shapes,SIGNAL(triggered()),this,SLOT(ExportBsButtonPressed()));
 
     actionExport_all = new QAction(MainWindow);
     actionExport_all->setObjectName(QStringLiteral("actionExport_all"));
+    QObject::connect(actionExport_all,SIGNAL(triggered()),this,SLOT(ExportAllButtonPressed()));
 
     centralwidget = new QWidget(MainWindow);
     centralwidget->setObjectName(QStringLiteral("centralwidget"));
@@ -274,6 +277,54 @@ void UserInterface::LoadKeypointsButtonPressed()
         if(!fileName.empty())
         {
             interactor->LoadKeypoints(fileName);
+        }
+    }
+}
+
+void UserInterface::ExportModelButtonPressed()
+{
+    if(initializer->newmodelImported)
+    {
+        InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
+        std::string fileName = QFileDialog::getSaveFileName(centralwidget,
+                                                            tr("Save model as obj"),
+                                                            NULL,
+                                                            tr("OBJ Files (*.obj)")).toStdString();
+        if(!fileName.empty())
+        {
+            interactor->ExportModel(fileName);
+        }
+    }
+}
+
+void UserInterface::ExportBsButtonPressed()
+{
+    if(initializer->newmodelImported)
+    {
+        InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
+        std::string folder = QFileDialog::getExistingDirectory(centralwidget,
+                                                            tr("Choose folder for blend shapes"),
+                                                            NULL,
+                                                            NULL).toStdString();
+        if(!folder.empty())
+        {
+            interactor->ExportBlendshapes(folder+"/");
+        }
+    }
+}
+
+void UserInterface::ExportAllButtonPressed()
+{
+    if(initializer->newmodelImported)
+    {
+        InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
+        std::string folder = QFileDialog::getExistingDirectory(centralwidget,
+                                                            tr("Choose folder"),
+                                                            NULL,
+                                                            NULL).toStdString();
+        if(!folder.empty())
+        {
+            interactor->ExportModelAndBS(folder+"/");
         }
     }
 }

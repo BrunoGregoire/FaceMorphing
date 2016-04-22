@@ -7,6 +7,10 @@ InteractorStyle::InteractorStyle()
     icpDone = false;
     tpstReady = false;
     glyphSelected = false;
+    drawMode = false;
+    isDrawing = false;
+
+    currentArea = 0;
 }
 
 void InteractorStyle::SetContent(Content* _content)
@@ -48,6 +52,52 @@ void InteractorStyle::SetFaceDetector(FaceDetector *_faceDetector)
     faceDetector = _faceDetector;
 }
 
+void InteractorStyle::SetDrawer(Drawer *_drawer)
+{
+    drawer = _drawer;
+}
+
+void InteractorStyle::OnLeftButtonDown()
+{
+    if(drawMode)
+    {
+        if(!isDrawing)
+        {
+            drawOrigin = new double[2];
+            drawEnd = new double[2];
+
+            drawOrigin[0] = Interactor->GetEventPosition()[0];
+            drawOrigin[1] = Interactor->GetEventPosition()[1];
+
+            currentShape = new vtk2DModel();
+
+            isDrawing = true;
+
+        }
+        else
+        {
+            drawEnd[0] = Interactor->GetEventPosition()[0];
+            drawEnd[1] = Interactor->GetEventPosition()[1];
+
+            if(currentArea<8)
+            {
+                drawer->SaveArea(currentShape,currentArea);
+                drawer->ProjectPoints(currentArea,content->newmodelKeypoints);
+                currentShape->HideModel();
+                content->newmodelKeypoints->UpdateIdLabels();
+                content->newmodelKeypoints->Render();
+                currentArea++;
+            }
+            else
+                drawMode = false;
+
+            isDrawing = false;
+        }
+    }
+    else
+        vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
+}
+
 /*
 void InteractorStyle::OnRightButtonDown()
 {
@@ -87,6 +137,8 @@ void InteractorStyle::OnMiddleButtonDown()
             content->newmodelKeypoints->Render();
             glyphSelected = true;
         }
+        else
+          vtkInteractorStyleTrackballCamera::OnMiddleButtonDown();
     }
     else
     {
@@ -119,6 +171,19 @@ void InteractorStyle::OnMouseMove()
         glyph->Render();
     }
 
+    if(drawMode && isDrawing)
+    {
+        drawEnd[0] = Interactor->GetEventPosition()[0];
+        drawEnd[1] = Interactor->GetEventPosition()[1];
+
+        currentShape->HideModel();
+        currentShape = drawer->DrawShape(drawOrigin,drawEnd,currentArea);
+        currentShape->SetRenderer(content->newmodelRenderer);
+        currentShape->SetRenderWindow(content->newmodelRenderWindow);
+        currentShape->ShowModel();
+        currentShape->Render();
+    }
+
     vtkInteractorStyleTrackballCamera::OnMouseMove();
 }
 
@@ -132,9 +197,6 @@ void InteractorStyle::OnKeyPress()
     if (key == "s")
         SaveKeypoint();
     */
-
-    if (key == "e")
-        ExportKeypoints();
 
     if (key == "a")
         DoAll();
@@ -166,8 +228,8 @@ void InteractorStyle::OnKeyPress()
     if (key == "c")
         ResetCameras();
 
-    if (key == "k")
-        SmoothMorphedModel();
+    if (key == "o")
+        ToggleDrawMode();
 
 }
 
@@ -186,9 +248,9 @@ void InteractorStyle::SaveKeypoint()
 }
 */
 
-void InteractorStyle::ExportKeypoints()
+void InteractorStyle::ExportBlendshapes(std::string folderPath)
 {
-    content->newmodelKeypoints->ExportIDs("Resources/newKeypoints.txt");
+    content->refModel->ExportBlendshapes(folderPath);
 }
 
 void InteractorStyle::LoadKeypoints(std::string path)
@@ -197,6 +259,22 @@ void InteractorStyle::LoadKeypoints(std::string path)
     content->newmodelKeypoints->UpdateIdLabels();
     content->newmodelKeypoints->ShowModel();
     content->newmodelKeypoints->Render();
+}
+
+void InteractorStyle::ExportKeypoints(std::string path)
+{
+    content->newmodelKeypoints->ExportIDs(path);//"Resources/newKeypoints.txt");
+}
+
+void InteractorStyle::ExportModel(std::string path)
+{
+    content->refModel->ExportAsOBJ(path);
+}
+
+void InteractorStyle::ExportModelAndBS(std::string folderPath)
+{
+    content->refModel->ExportAsOBJ(folderPath+"result");
+    ExportBlendshapes(folderPath);
 }
 
 /*
@@ -311,6 +389,7 @@ void InteractorStyle::TextureModels()
     if(icpDone)
     {
         texturer->Texture(content->alignedModel,content->refModel);
+        content->refModel->TextureBlendshapes();
         content->refModel->Render();
     }
 }
@@ -337,22 +416,12 @@ void InteractorStyle::FaceDetection()
     content->newmodelRenderWindow->Render();
 }
 
-void InteractorStyle::SmoothMorphedModel()
-{
-
-}
-
 void InteractorStyle::CutNewmodel()
 {
 
 }
 
 void InteractorStyle::ComputeBlendshapes()
-{
-
-}
-
-void InteractorStyle::TakeScreenshot(vtkSmartPointer<vtkRenderWindow> renderWindow,std::string imgPath)
 {
 
 }
@@ -374,6 +443,14 @@ void InteractorStyle::ResetCameras()
     newCamera->DeepCopy(content->refRenderer->GetActiveCamera());
     content->newmodelRenderer->SetActiveCamera(newCamera);
     content->newmodelRenderWindow->Render();
+}
+
+void InteractorStyle::ToggleDrawMode()
+{
+    if(drawMode)
+        drawMode = false;
+    else
+        drawMode = true;
 }
 
 vtkStandardNewMacro(InteractorStyle);

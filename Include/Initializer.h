@@ -21,6 +21,7 @@
 #include "Texturer.h"
 #include "Raycaster.h"
 #include "FaceDetector.h"
+#include "Drawer.h"
 
 class Initializer
 {
@@ -31,6 +32,7 @@ public:
     Texturer* texturer;
     Raycaster* raycaster;
     FaceDetector* faceDetector;
+    Drawer* drawer;
 
     bool newmodelImported;
 

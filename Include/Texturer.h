@@ -21,8 +21,8 @@ class Texturer
 {
 public:
 
-
     void Texture(vtkMeshModel* source, vtkMeshModel* target);
+    void Texture(vtkSmartPointer<vtkPolyData> source,vtkSmartPointer<vtkPolyData> target);
 };
 
 #endif

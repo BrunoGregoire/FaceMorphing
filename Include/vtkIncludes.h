@@ -58,3 +58,6 @@
 #include <vtkPolygonBuilder.h>
 #include <vtkFeatureEdges.h>
 #include <vtkVectorText.h>
+#include <vtkRegularPolygonSource.h>
+#include <vtkPolyDataMapper2D.h>
+#include <vtkPolyLine.h>

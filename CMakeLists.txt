@@ -28,7 +28,7 @@ FILE(GLOB_RECURSE INC_ALL "Include/*.h")
 include_directories("Include")
 
 #add src
-add_executable(FaceMorphing MACOSX_BUNDLE Main UserInterface vtkModel vtkMeshModel vtkGlyphModel vtkLineModel vtkVectorTextModel Content Initializer InteractorStyle ICP TPST Texturer Raycaster FaceDetector ${INC_ALL})
+add_executable(FaceMorphing MACOSX_BUNDLE Main UserInterface vtkModel vtkMeshModel vtkGlyphModel vtkLineModel vtk2DModel vtkVectorTextModel Content Initializer InteractorStyle ICP TPST Texturer Raycaster FaceDetector Drawer ${INC_ALL})
  
 #link with qt
 TARGET_LINK_LIBRARIES(FaceMorphing ${Qt5Widgets_LIBRARIES})

@@ -20,6 +20,7 @@
 #include "Texturer.h"
 #include "Raycaster.h"
 #include "FaceDetector.h"
+#include "Drawer.h"
 
 class InteractorStyle : public vtkInteractorStyleTrackballCamera
 {
@@ -35,12 +36,20 @@ public:
     Texturer* texturer;
     Raycaster* raycaster;
     FaceDetector* faceDetector;
+    Drawer* drawer;
+    bool drawMode;
+
+    bool isDrawing;
+    double* drawOrigin;
+    double* drawEnd;
 
     vtkSmartPointer<vtkCellPicker> picker;
     vtkGlyphModel* glyph;
 
     bool glyphSelected;
     int glyphIndex;
+    vtk2DModel* currentShape;
+    int currentArea;
 
     InteractorStyle();
 
@@ -50,15 +59,20 @@ public:
     void SetTexturer (Texturer* _texturer);
     void SetRaycaster (Raycaster* _raycaster);
     void SetFaceDetector (FaceDetector* _faceDetector);
+    void SetDrawer (Drawer* _drawer);
 
+    void OnLeftButtonDown();
     //void OnRightButtonDown();
     void OnMiddleButtonDown();
     void OnMouseMove();
     void OnKeyPress();
 
     //void SaveKeypoint();
-    void ExportKeypoints();
+    void ExportBlendshapes(std::string folderPath);
     void LoadKeypoints(std::string path);
+    void ExportKeypoints(std::string path);
+    void ExportModel(std::string path);
+    void ExportModelAndBS(std::string folderPath);
     void UpdateText();
     void DoAll();
     void AlignModels();
@@ -69,10 +83,11 @@ public:
     void RaycastHead();
     void CylinderRaycast();
     void FaceDetection();
-    void SmoothMorphedModel();
     void CutNewmodel();
-    void TakeScreenshot(vtkSmartPointer<vtkRenderWindow> renderWindow,std::string imgPath);
     void ResetCameras();
+    void ToggleDrawMode();
+    void DrawCircle();
+
 };
 
 #endif
