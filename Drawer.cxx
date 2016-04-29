@@ -3,12 +3,13 @@
 
 vtk2DModel* Drawer::DrawShape(double* origin, double* end, int shapeIndex)
 {
-    if(shapeIndex == 0 || shapeIndex>4)
+    if(shapeIndex == 0 || shapeIndex>3)
         return DrawCircle(origin,end);
-    else if(shapeIndex == 1 || shapeIndex == 2 || shapeIndex == 4)
+    else if(shapeIndex == 1 || shapeIndex == 3)
         return DrawLine(origin,end,5);
-    else if(shapeIndex==3)
+    else if(shapeIndex==2)
         return DrawLine(origin,end,4);
+    return NULL;
 }
 
 vtk2DModel* Drawer::DrawCircle(double* origin, double* end)
@@ -100,11 +101,14 @@ void Drawer::ProjectPoints(int area, vtkGlyphModel* glyphModel)
 
             break;
         }
-        case 1: // LEFT EYEBROW
+        case 1: // RIGHT EYEBROW
         {
             vtkSmartPointer<vtkPolyData> polyData = shapes[1]->polyData;
             glyphModel->mesh->BuildKdTree();
 
+            std::vector<int> points;
+            std::vector<double*> positions;
+
             double* origin = polyData->GetPoint(0);
             double originX = origin[0];
             double* end = polyData->GetPoint(4);
@@ -123,40 +127,22 @@ void Drawer::ProjectPoints(int area, vtkGlyphModel* glyphModel)
                 picker->Pick(point[0],point[1],0,glyphModel->renderer);
                 vtkIdType id = glyphModel->mesh->kdTree->FindClosestPoint(picker->GetPickPosition());
                 glyphModel->InsertNextID(id);
+
+                points.push_back(17+i);
+                double* pos = new double[3];
+                pos[0] = picker->GetPickPosition()[0];
+                pos[1] = picker->GetPickPosition()[1];
+                pos[2] = picker->GetPickPosition()[2];
+                positions.push_back(pos);
             }
+
+            ProjectSymetrics(points,positions,glyphModel);
 
             break;
         }
-        case 2: // RIGHT EYEBROW
+        case 2: // NOSE VERTICAL
         {
             vtkSmartPointer<vtkPolyData> polyData = shapes[2]->polyData;
-            glyphModel->mesh->BuildKdTree();
-
-            double* origin = polyData->GetPoint(0);
-            double originX = origin[0];
-            double* end = polyData->GetPoint(4);
-            double endX = end[0];
-
-            for(int i=0;i<5;i++)
-            {
-                int index;
-                if(originX<endX)
-                    index = i;
-                else
-                    index = 4-i;
-
-                double* point = polyData->GetPoint(index);
-                vtkSmartPointer<vtkCellPicker> picker = vtkSmartPointer<vtkCellPicker>::New();
-                picker->Pick(point[0],point[1],0,glyphModel->renderer);
-                vtkIdType id = glyphModel->mesh->kdTree->FindClosestPoint(picker->GetPickPosition());
-                glyphModel->InsertNextID(id);
-            }
-
-            break;
-        }
-        case 3: // NOSE VERTICAL
-        {
-            vtkSmartPointer<vtkPolyData> polyData = shapes[3]->polyData;
             glyphModel->mesh->BuildKdTree();
 
             double* origin = polyData->GetPoint(0);
@@ -181,9 +167,9 @@ void Drawer::ProjectPoints(int area, vtkGlyphModel* glyphModel)
 
             break;
         }
-        case 4: // NOSE HORIZONTAL
+        case 3: // NOSE HORIZONTAL
         {
-            vtkSmartPointer<vtkPolyData> polyData = shapes[4]->polyData;
+            vtkSmartPointer<vtkPolyData> polyData = shapes[3]->polyData;
             glyphModel->mesh->BuildKdTree();
 
             double* origin = polyData->GetPoint(0);
@@ -208,59 +194,46 @@ void Drawer::ProjectPoints(int area, vtkGlyphModel* glyphModel)
 
             break;
         }
-        case 5: // RIGHT EYE
+        case 4: // RIGHT EYE
+        {
+            vtkSmartPointer<vtkPolyData> polyData = shapes[4]->polyData;
+            glyphModel->mesh->BuildKdTree();
+
+            std::vector<int> points;
+            std::vector<double*> positions;
+
+            int step = polyData->GetNumberOfPoints()/6;
+
+            for(int i=0;i<6;i++)
+            {
+                int index;
+
+                if(i<2)
+                    index = step*(5+i)-step/2;
+                else
+                    index = step*(i-1)-step/2;
+
+                double* point = polyData->GetPoint(index);
+                vtkSmartPointer<vtkCellPicker> picker = vtkSmartPointer<vtkCellPicker>::New();
+                picker->Pick(point[0],point[1],0,glyphModel->renderer);
+                vtkIdType id = glyphModel->mesh->kdTree->FindClosestPoint(picker->GetPickPosition());
+                glyphModel->InsertNextID(id);
+
+                points.push_back(36+i);
+                double* pos = new double[3];
+                pos[0] = picker->GetPickPosition()[0];
+                pos[1] = picker->GetPickPosition()[1];
+                pos[2] = picker->GetPickPosition()[2];
+                positions.push_back(pos);
+            }
+
+            ProjectSymetrics(points,positions,glyphModel);
+
+            break;
+        }
+        case 5: // MOUTH
         {
             vtkSmartPointer<vtkPolyData> polyData = shapes[5]->polyData;
-            glyphModel->mesh->BuildKdTree();
-
-            int step = polyData->GetNumberOfPoints()/6;
-
-            for(int i=0;i<6;i++)
-            {
-                int index;
-
-                if(i<2)
-                    index = step*(5+i)-step/2;
-                else
-                    index = step*(i-1)-step/2;
-
-                double* point = polyData->GetPoint(index);
-                vtkSmartPointer<vtkCellPicker> picker = vtkSmartPointer<vtkCellPicker>::New();
-                picker->Pick(point[0],point[1],0,glyphModel->renderer);
-                vtkIdType id = glyphModel->mesh->kdTree->FindClosestPoint(picker->GetPickPosition());
-                glyphModel->InsertNextID(id);
-            }
-
-            break;
-        }
-        case 6: // LEFT EYE
-        {
-            vtkSmartPointer<vtkPolyData> polyData = shapes[6]->polyData;
-            glyphModel->mesh->BuildKdTree();
-
-            int step = polyData->GetNumberOfPoints()/6;
-
-            for(int i=0;i<6;i++)
-            {
-                int index;
-
-                if(i<2)
-                    index = step*(5+i)-step/2;
-                else
-                    index = step*(i-1)-step/2;
-
-                double* point = polyData->GetPoint(index);
-                vtkSmartPointer<vtkCellPicker> picker = vtkSmartPointer<vtkCellPicker>::New();
-                picker->Pick(point[0],point[1],0,glyphModel->renderer);
-                vtkIdType id = glyphModel->mesh->kdTree->FindClosestPoint(picker->GetPickPosition());
-                glyphModel->InsertNextID(id);
-            }
-
-            break;
-        }
-        case 7: // MOUTH
-        {
-            vtkSmartPointer<vtkPolyData> polyData = shapes[7]->polyData;
             glyphModel->mesh->BuildKdTree();
 
             int step = polyData->GetNumberOfPoints()/12;
@@ -283,10 +256,13 @@ void Drawer::ProjectPoints(int area, vtkGlyphModel* glyphModel)
 
             break;
         }
-        case 8: // Right ear
+        case 6: // Right ear
         {
-            vtkSmartPointer<vtkPolyData> polyData = shapes[8]->polyData;
+            vtkSmartPointer<vtkPolyData> polyData = shapes[6]->polyData;
             glyphModel->mesh->BuildKdTree();
+
+            std::vector<int> points;
+            std::vector<double*> positions;
 
             int step = polyData->GetNumberOfPoints()/4;
 
@@ -302,32 +278,21 @@ void Drawer::ProjectPoints(int area, vtkGlyphModel* glyphModel)
                     picker->Pick(point[0],point[1],0,glyphModel->renderer);
                     vtkIdType id = glyphModel->mesh->kdTree->FindClosestPoint(picker->GetPickPosition());
                     glyphModel->InsertNextID(id);
+
+                    if(i==0)
+                        points.push_back(60);
+                    else
+                        points.push_back(59+i);
+                    double* pos = new double[3];
+                    pos[0] = picker->GetPickPosition()[0];
+                    pos[1] = picker->GetPickPosition()[1];
+                    pos[2] = picker->GetPickPosition()[2];
+                    positions.push_back(pos);
                 }
+
             }
 
-            break;
-        }
-        case 9: // Left ear
-        {
-            vtkSmartPointer<vtkPolyData> polyData = shapes[9]->polyData;
-            glyphModel->mesh->BuildKdTree();
-
-            int step = polyData->GetNumberOfPoints()/4;
-
-            for(int i=0;i<4;i++)
-            {
-                int index;
-                index = step*i;
-
-                if(i!=3)
-                {
-                    double* point = polyData->GetPoint(index);
-                    vtkSmartPointer<vtkCellPicker> picker = vtkSmartPointer<vtkCellPicker>::New();
-                    picker->Pick(point[0],point[1],0,glyphModel->renderer);
-                    vtkIdType id = glyphModel->mesh->kdTree->FindClosestPoint(picker->GetPickPosition());
-                    glyphModel->InsertNextID(id);
-                }
-            }
+            ProjectSymetrics(points,positions,glyphModel);
 
             break;
         }
@@ -337,4 +302,42 @@ void Drawer::ProjectPoints(int area, vtkGlyphModel* glyphModel)
     glyphModel->Update();
     glyphModel->ShowModel();
     glyphModel->Render();
+}
+
+void Drawer::ProjectSymetrics(std::vector<int> points,std::vector<double*> positions, vtkGlyphModel *glyphModel)
+{
+    std::vector<int> syms;
+    for(int i=0;i<points.size();i++)
+    {
+        syms.push_back(KeypointsManager::GetSymmetric(points[i]));
+        std::cout<<syms[0]<<std::endl;
+    }
+
+    if(syms[0]<syms[1])
+    {
+        for(int i=0;i<syms.size();i++)
+        {
+            double* point = positions[i];
+            double symPoint[3];
+            symPoint[0] = -point[0];
+            symPoint[1] = point[1];
+            symPoint[2] = point[2];
+            vtkIdType symId = glyphModel->mesh->kdTree->FindClosestPoint(symPoint);
+            glyphModel->InsertNextID(symId);
+        }
+    }
+    else
+    {
+        for(int i=syms.size()-1;i>=0;i--)
+        {
+            double* point = positions[i];
+            double symPoint[3];
+            symPoint[0] = -point[0];
+            symPoint[1] = point[1];
+            symPoint[2] = point[2];
+            vtkIdType symId = glyphModel->mesh->kdTree->FindClosestPoint(symPoint);
+            glyphModel->InsertNextID(symId);
+        }
+    }
+
 }
