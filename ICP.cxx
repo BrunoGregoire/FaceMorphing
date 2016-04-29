@@ -49,6 +49,14 @@ void ICP::Align(vtkGlyphModel *sourceKeypoints, vtkGlyphModel *targetKeypoints, 
     sourceKeypoints->mesh->ApplyTransMat(transMat);
     sourceKeypoints->mesh->Update();
 
+    if(!sourceKeypoints->mesh->blendshapes.empty())
+    {
+        vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
+        transform->SetMatrix(transMat);
+        transform->Update();
+        sourceKeypoints->mesh->TransformBlendshapes(transform);
+    }
+
     sourceKeypoints->UpdatePoints();
     sourceKeypoints->UpdateGlyph();
     sourceKeypoints->Render();

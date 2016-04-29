@@ -60,6 +60,31 @@ void vtkMeshModel::ReadTexture(std::string fileName)
     actor->SetTexture(texture);
 }
 
+void vtkMeshModel::Center()
+{
+    vtkSmartPointer<vtkCenterOfMass> centerOfMass = vtkSmartPointer<vtkCenterOfMass>::New();
+    centerOfMass->SetInputData(polyData);
+    centerOfMass->SetUseScalarsAsWeights(false);
+    centerOfMass->Update();
+
+    double center[3];
+    centerOfMass->GetCenter(center);
+    double translate[3];
+    translate[0] = -center[0];
+    translate[1] = -center[1];
+    translate[2] = -center[2];
+
+    vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
+    transform->Translate(translate);
+
+    vtkSmartPointer<vtkTransformFilter> filter = vtkSmartPointer<vtkTransformFilter>::New();
+    filter->SetInputData(polyData);
+    filter->SetTransform(transform);
+    filter->Update();
+
+    polyData->DeepCopy(filter->GetPolyDataOutput());
+}
+
 void vtkMeshModel::Texture(vtkSmartPointer<vtkTexture> _texture)
 {
     texture = vtkSmartPointer<vtkTexture>::New();
@@ -156,6 +181,14 @@ void vtkMeshModel::TransformBlendshapes(vtkSmartPointer<vtkAbstractTransform> tr
     }
 }
 
+bool Replace(std::string& str, const std::string& from, const std::string& to) {
+    size_t start_pos = str.find(from);
+    if(start_pos == std::string::npos)
+        return false;
+    str.replace(start_pos, from.length(), to);
+    return true;
+}
+
 void vtkMeshModel::ExportBlendshapes(std::string folderPath)
 {
     for(int i=0;i<blendshapes.size();i++)
@@ -183,6 +216,27 @@ void vtkMeshModel::ExportBlendshapes(std::string folderPath)
         objExporter->Write();
 
         renderWindow->Finalize();
+
+        std::string objText,line;
+        ifstream file (fileName+".obj");
+        if (file.is_open())
+        {
+            while ( getline (file,line) )
+                objText += line + '\n';
+
+            file.close();
+        }
+        else std::cout << "Unable to open "<<fileName+".obj"<<std::endl;
+
+        Replace(objText,"grp1",bsNames[i]);
+
+        ofstream newfile (fileName+".obj");
+        if (newfile.is_open())
+        {
+            newfile << objText;
+            newfile.close();
+        }
+        else cout << "Unable to open file";
     }
 }
 

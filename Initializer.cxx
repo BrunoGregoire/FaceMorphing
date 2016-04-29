@@ -22,6 +22,7 @@ void Initializer::Init()
     // INIT REF MODEL
     content->refModel = new vtkMeshModel();
     content->refModel->ReadFromOBJ("Models/Ref/Ref.obj");
+    content->refModel->Center();
     content->refModel->BuildKdTree();
     content->refModel->Update();
     content->refModel->ReadTexture("Models/Ref/Textures/Ref.jpg");
@@ -106,30 +107,18 @@ void Initializer::Init()
 
     content->refModel->LoadBlendshapes("Models/Ref/BS/");
 
-    // INIT REF KEYPOINTS NAMES
-    /*
-    content->nbKeypoints = 19;
-    content->keypointsNames = new std::string[content->nbKeypoints];
-    content->keypointsNames[0] = "Select Left Eye Int Corner";
-    content->keypointsNames[1] = "Select Left Eye Up";
-    content->keypointsNames[2] = "Select Left Eye Down";
-    content->keypointsNames[3] = "Select Left Eye Ext Corner";
-    content->keypointsNames[4] = "Select Right Eye Int Corner";
-    content->keypointsNames[5] = "Select Right Eye up";
-    content->keypointsNames[6] = "Select Right Eye down";
-    content->keypointsNames[7] = "Select Right Eye Ext Corner";
-    content->keypointsNames[8] = "Select Nose Left Corner";
-    content->keypointsNames[9] = "Select End Nose";
-    content->keypointsNames[10] = "Select Nose Right Corner";
-    content->keypointsNames[11] = "Select Mouth Left Corner";
-    content->keypointsNames[12] = "Select Mouth Center";
-    content->keypointsNames[13] = "Select Mouth Right Corner";
-    content->keypointsNames[14] = "Select Start Neck";
-    content->keypointsNames[15] = "Select Left Ear Down";
-    content->keypointsNames[16] = "Select Left Ear Up";
-    content->keypointsNames[17] = "Select Right Ear Down";
-    content->keypointsNames[18] = "Select Right Ear Up";
-    */
+    // INIT KEYPOINTS AREAS NAMES
+    content->areasNames = new std::string[10];
+    content->areasNames[0] = "Draw circle for the face";
+    content->areasNames[1] = "Draw line for the right eyebrow";
+    content->areasNames[2] = "Draw line for the left eyebrow";
+    content->areasNames[3] = "Draw vertical line for the Nose";
+    content->areasNames[4] = "Draw horizontal line for the bottom of the nose";
+    content->areasNames[5] = "Draw circle around the right eye";
+    content->areasNames[6] = "Draw circle around the left eye";
+    content->areasNames[7] = "Draw circle around the mouth";
+    content->areasNames[8] = "Draw circle around the right ear";
+    content->areasNames[9] = "Draw circle around the left ear";
 
     // INIT REF KEYPOINTS
     content->refKeypoints = new vtkGlyphModel(content->refModel);
@@ -168,6 +157,7 @@ void Initializer::InitNewModel(std::string fileName)
     content->newModel = new vtkMeshModel();
     content->newModel->ReadFromOBJ(fileName);
     content->newModel->ScaleWith(content->refModel);
+    content->newModel->Center();
     content->newModel->BuildKdTree();
     content->newModel->Update();
     content->newModel->SetRenderer(content->newmodelRenderer);

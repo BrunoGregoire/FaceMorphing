@@ -21,6 +21,7 @@
 #include "Raycaster.h"
 #include "FaceDetector.h"
 #include "Drawer.h"
+#include "KeypointsManager.h"
 
 class InteractorStyle : public vtkInteractorStyleTrackballCamera
 {
@@ -45,9 +46,16 @@ public:
 
     vtkSmartPointer<vtkCellPicker> picker;
     vtkGlyphModel* glyph;
-
     bool glyphSelected;
     int glyphIndex;
+
+    bool symetricMode;
+    vtkGlyphModel* symGlyph;
+    bool symGlyphSelected;
+    int symGlyphIndex;
+    double* symPosition;
+
+
     vtk2DModel* currentShape;
     int currentArea;
 
@@ -62,15 +70,13 @@ public:
     void SetDrawer (Drawer* _drawer);
 
     void OnLeftButtonDown();
-    //void OnRightButtonDown();
-    void OnMiddleButtonDown();
+    void OnRightButtonDown();
     void OnMouseMove();
     void OnKeyPress();
 
-    //void SaveKeypoint();
     void ExportBlendshapes(std::string folderPath);
     void LoadKeypoints(std::string path);
-    void ExportKeypoints(std::string path);
+    void SaveKeypoints(std::string path);
     void ExportModel(std::string path);
     void ExportModelAndBS(std::string folderPath);
     void UpdateText();
@@ -81,7 +87,9 @@ public:
     void TextureModels();
     void ComputeBlendshapes();
     void RaycastHead();
+    void RaycastHead(int precision);
     void CylinderRaycast();
+    void CylinderRaycast(int precision);
     void FaceDetection();
     void CutNewmodel();
     void ResetCameras();

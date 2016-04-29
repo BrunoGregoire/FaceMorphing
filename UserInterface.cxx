@@ -22,6 +22,10 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     actionLoad_keypoints->setObjectName(QStringLiteral("actionLoad_keypoints"));
     QObject::connect(actionLoad_keypoints,SIGNAL(triggered()),this,SLOT(LoadKeypointsButtonPressed()));
 
+    actionSave_keypoints = new QAction(MainWindow);
+    actionSave_keypoints->setObjectName(QStringLiteral("actionSave_keypoints"));
+    QObject::connect(actionSave_keypoints,SIGNAL(triggered()),this,SLOT(SaveKeypointsButtonPressed()));
+
     actionExport_model = new QAction(MainWindow);
     actionExport_model->setObjectName(QStringLiteral("actionExport_model"));
     QObject::connect(actionExport_model,SIGNAL(triggered()),this,SLOT(ExportModelButtonPressed()));
@@ -60,19 +64,6 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     groupBox->setBaseSize(QSize(0, 35));
     groupBox->setLayoutDirection(Qt::RightToLeft);
     groupBox->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
-
-    /*
-    SavePointButton = new QPushButton(groupBox);
-    SavePointButton->setObjectName(QStringLiteral("SavePointButton"));
-    SavePointButton->setGeometry(QRect(0, 0, 51, 51));
-    SavePointButton->setToolTip(QStringLiteral("Save selected key point (s)"));
-    SavePointButton->setToolTipDuration(-1);
-    QIcon SavePointicon;
-    SavePointicon.addFile(QStringLiteral("Icons/SaveIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
-    SavePointButton->setIcon(SavePointicon);
-    SavePointButton->setIconSize(QSize(45, 45));
-    QObject::connect(SavePointButton,SIGNAL(pressed()),this,SLOT(SavePointButtonPressed()));
-    */
 
     AllButton = new QPushButton(groupBox);
     AllButton->setObjectName(QStringLiteral("AllButton"));
@@ -204,7 +195,9 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     menuFile->addAction(actionImport);
     menuFile->addAction(actionImport_texture);
     menuFile->addAction(actionImport_all);
+    menuFile->addSeparator();
     menuFile->addAction(actionLoad_keypoints);
+    menuFile->addAction(actionSave_keypoints);
     menuFile->addSeparator();
     menuFile->addAction(actionExport_model);
     menuFile->addAction(actionExport_blend_shapes);
@@ -222,6 +215,7 @@ void UserInterface::retranslateUi(QMainWindow *MainWindow)
     actionImport_texture->setText(QApplication::translate("MainWindow", "Import texture", 0));
     actionImport_all->setText(QApplication::translate("MainWindow", "Import model and texture", 0));
     actionLoad_keypoints->setText(QApplication::translate("MainWindow", "Load keypoints", 0));
+    actionSave_keypoints->setText(QApplication::translate("MainWindow", "Save keypoints", 0));
     actionExport_model->setText(QApplication::translate("MainWindow", "Export model", 0));
     actionExport_blend_shapes->setText(QApplication::translate("MainWindow", "Export blend shapes", 0));
     actionExport_all->setText(QApplication::translate("MainWindow", "Export all", 0));
@@ -277,6 +271,23 @@ void UserInterface::LoadKeypointsButtonPressed()
         if(!fileName.empty())
         {
             interactor->LoadKeypoints(fileName);
+        }
+    }
+}
+
+void UserInterface::SaveKeypointsButtonPressed()
+{
+    if(initializer->newmodelImported)
+    {
+        InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
+
+        std::string fileName = QFileDialog::getSaveFileName(centralwidget,
+                                                            tr("Save in txt file"),NULL,
+                                                            tr("Text files (*.txt)")).toStdString();
+
+        if(!fileName.empty())
+        {
+            interactor->SaveKeypoints(fileName);
         }
     }
 }

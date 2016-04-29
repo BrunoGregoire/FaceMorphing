@@ -27,8 +27,8 @@ public:
     vtkSmartPointer<vtkPoints> secondIntersecPoints;
     vtkSmartPointer<vtkIdList> secondIntersecCellIds;
 
-    void TopRaycast(vtkGlyphModel* firstKeypoints, vtkGlyphModel* secondKeypoints);
-    void CylindricalRaycast(vtkGlyphModel* firstKeypoints, vtkGlyphModel* secondKeypoints);
+    void TopRaycast(vtkGlyphModel* firstKeypoints, vtkGlyphModel* secondKeypoints, int precision);
+    void CylindricalRaycast(vtkGlyphModel* firstKeypoints, vtkGlyphModel* secondKeypoints, int precision);
     void Cast(double *origin, double *end, vtkGlyphModel *firstKeypoints, vtkGlyphModel *secondKeypoints);
 };
 

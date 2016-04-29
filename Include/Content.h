@@ -25,7 +25,7 @@ public:
     vtkMeshModel* alignedModel;
 
     int nbKeypoints;
-    std::string* keypointsNames;
+    std::string* areasNames;
     vtkGlyphModel* refKeypoints;
     vtkGlyphModel* newmodelKeypoints;
     vtkGlyphModel* alignedKeypoints;

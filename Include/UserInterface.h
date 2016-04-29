@@ -27,6 +27,7 @@ public:
     QAction *actionImport_texture;
     QAction *actionImport_all;
     QAction *actionLoad_keypoints;
+    QAction *actionSave_keypoints;
     QAction *actionExport_model;
     QAction *actionExport_blend_shapes;
     QAction *actionExport_all;
@@ -35,7 +36,6 @@ public:
     QVBoxLayout *verticalLayout;
     QHBoxLayout *horizontalLayout;
     QGroupBox *groupBox;
-    //QPushButton *SavePointButton;
     QPushButton *AllButton;
     QPushButton *AlignButton;
     QPushButton *ToggleVisibilityButton;
@@ -61,10 +61,10 @@ public slots:
     void TextureButtonPressed();
     void ImportAllButtonPressed();
     void LoadKeypointsButtonPressed();
+    void SaveKeypointsButtonPressed();
     void ExportModelButtonPressed();
     void ExportBsButtonPressed();
     void ExportAllButtonPressed();
-    //void SavePointButtonPressed();
     void AlignButtonPressed();
     void ToggleVisibilityButtonPressed();
     void AllButtonPressed();

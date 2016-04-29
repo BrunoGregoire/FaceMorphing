@@ -10,6 +10,8 @@
 #ifndef DRAWER_H
 #define DRAWER_H
 
+#include <stdexcept>
+
 #include "vtkIncludes.h"
 
 #include "vtk2DModel.h"
@@ -19,7 +21,8 @@
 class Drawer
 {
 public:
-    vtk2DModel* shapes[8];
+    int nbShapes = 10;
+    vtk2DModel* shapes[10];
 
     vtk2DModel* DrawShape(double* origin, double* end, int shapeIndex);
     vtk2DModel* DrawCircle(double* origin, double* end);

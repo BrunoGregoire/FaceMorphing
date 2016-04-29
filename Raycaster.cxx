@@ -1,6 +1,6 @@
 #include "Raycaster.h"
 
-void Raycaster::TopRaycast(vtkGlyphModel *firstKeypoints, vtkGlyphModel *secondKeypoints)
+void Raycaster::TopRaycast(vtkGlyphModel *firstKeypoints, vtkGlyphModel *secondKeypoints, int precision)
 {
     firstIntersecPoints = vtkSmartPointer<vtkPoints>::New();
     firstIntersecCellIds = vtkSmartPointer<vtkIdList>::New();
@@ -13,13 +13,13 @@ void Raycaster::TopRaycast(vtkGlyphModel *firstKeypoints, vtkGlyphModel *secondK
     double* origin = new double[3];
     double* end = new double[3];
 
-    for(int j=0;j<8;j++)
+    for(int j=0;j<(8*precision);j++)
     {
-        double angle_x = 3.1416*(((double)j)/8);
+        double angle_x = 3.1416*(((double)j)/(8*precision));
 
-        for(int i=0;i<8;i++)
+        for(int i=0;i<(8*precision);i++)
         {
-            double angle_y = 3.1416*(((double)i)/8);
+            double angle_y = 3.1416*(((double)i)/(8*precision));
 
             origin[0] = 300*cos(angle_x)*sin(angle_y);
             origin[1] = 300*sin(angle_x)*sin(angle_y)+80;
@@ -45,7 +45,7 @@ void Raycaster::TopRaycast(vtkGlyphModel *firstKeypoints, vtkGlyphModel *secondK
     }
 }
 
-void Raycaster::CylindricalRaycast(vtkGlyphModel *firstKeypoints, vtkGlyphModel *secondKeypoints)
+void Raycaster::CylindricalRaycast(vtkGlyphModel *firstKeypoints, vtkGlyphModel *secondKeypoints, int precision)
 {
     firstIntersecPoints = vtkSmartPointer<vtkPoints>::New();
     firstIntersecCellIds = vtkSmartPointer<vtkIdList>::New();
@@ -60,13 +60,13 @@ void Raycaster::CylindricalRaycast(vtkGlyphModel *firstKeypoints, vtkGlyphModel 
     double* origin = new double[3];
     double* end = new double[3];
 
-    for(int j=0;j<16;j++)
+    for(int j=0;j<(16*precision);j++)
     {
-        double angle = (2*3.1416)*(((double)j)/16);
+        double angle = (2*3.1416)*(((double)j)/(16*precision));
         double x = 300*cos(angle);
         double z = 300*sin(angle);
 
-        for(int y=-150;y<80;y+=20)
+        for(int y=-150;y<80;y+=20/precision)
         {
             origin[0]=x;
             origin[1]=y+randOffset;

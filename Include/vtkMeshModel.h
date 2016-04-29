@@ -37,6 +37,7 @@ public:
     void ReadFromOBJ(std::string fileName);
     void ExportAsOBJ(std::string fileName);
     void ReadTexture(std::string fileName);
+    void Center();
     void Texture(vtkSmartPointer<vtkTexture> _texture);
     void ScaleWith(vtkMeshModel* otherMesh);
     void BuildKdTree();

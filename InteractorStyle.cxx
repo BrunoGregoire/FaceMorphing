@@ -6,9 +6,14 @@ InteractorStyle::InteractorStyle()
 
     icpDone = false;
     tpstReady = false;
+
     glyphSelected = false;
+
     drawMode = false;
     isDrawing = false;
+
+    symetricMode = true;
+    symPosition = new double[3];
 
     currentArea = 0;
 }
@@ -17,14 +22,10 @@ void InteractorStyle::SetContent(Content* _content)
 {
     content = _content;
     glyph = new vtkGlyphModel(content->newModel);
+    symGlyph = new vtkGlyphModel(content->newModel);
 
     content->text = vtkSmartPointer<vtkTextActor>::New();
     content->newmodelRenderer->AddActor(content->text);
-
-    /*
-    currentKeypoint = 0;
-    UpdateText();
-    */
 }
 
 void InteractorStyle::SetICP(ICP *_icp)
@@ -79,7 +80,7 @@ void InteractorStyle::OnLeftButtonDown()
             drawEnd[0] = Interactor->GetEventPosition()[0];
             drawEnd[1] = Interactor->GetEventPosition()[1];
 
-            if(currentArea<8)
+            if(currentArea<drawer->nbShapes)
             {
                 drawer->SaveArea(currentShape,currentArea);
                 drawer->ProjectPoints(currentArea,content->newmodelKeypoints);
@@ -87,8 +88,10 @@ void InteractorStyle::OnLeftButtonDown()
                 content->newmodelKeypoints->UpdateIdLabels();
                 content->newmodelKeypoints->Render();
                 currentArea++;
+                UpdateText();
             }
-            else
+
+            if(currentArea == drawer->nbShapes)
                 drawMode = false;
 
             isDrawing = false;
@@ -98,30 +101,7 @@ void InteractorStyle::OnLeftButtonDown()
         vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
 }
 
-/*
 void InteractorStyle::OnRightButtonDown()
-{
-    // Get the selected point
-    int x = Interactor->GetEventPosition()[0];
-    int y = Interactor->GetEventPosition()[1];
-    picker->Pick(x,y,0,content->newmodelRenderer);
-
-    if(picker->GetActor() == content->newModel->actor)
-    {
-        double* position = picker->GetPickPosition();
-
-        vtkIdType id = content->newModel->kdTree->FindClosestPoint(position);
-
-        glyph->ClearPoints();
-        glyph->InsertNextID(id);
-        glyph->UpdateGlyph();
-        glyph->ShowModel();
-        glyph->Render();
-    }
-}
-*/
-
-void InteractorStyle::OnMiddleButtonDown()
 {
     int x = Interactor->GetEventPosition()[0];
     int y = Interactor->GetEventPosition()[1];
@@ -130,19 +110,56 @@ void InteractorStyle::OnMiddleButtonDown()
 
     if(!glyphSelected)
     {
-        glyphIndex = content->newmodelKeypoints->FindClosestPoint(tempPicker->GetPickPosition(),10);
+        glyphIndex = content->newmodelKeypoints->FindClosestPoint(tempPicker->GetPickPosition(),20);
+
+        if(symetricMode)
+            symGlyphIndex = KeypointsManager::GetSymmetric(glyphIndex);
+
         if(glyphIndex != -1)
         {
-            content->newmodelKeypoints->RemovePointAndID(glyphIndex);
+            if(symGlyphIndex == -1)
+            {
+                content->newmodelKeypoints->RemovePointAndID(glyphIndex);
+            }
+            else
+            {
+                if(glyphIndex > symGlyphIndex)
+                {
+                    content->newmodelKeypoints->RemovePointAndID(glyphIndex);
+                    content->newmodelKeypoints->RemovePointAndID(symGlyphIndex);
+                }
+                else
+                {
+                    content->newmodelKeypoints->RemovePointAndID(symGlyphIndex);
+                    content->newmodelKeypoints->RemovePointAndID(glyphIndex);
+                }
+                symGlyphSelected = true;
+            }
+
             content->newmodelKeypoints->Render();
             glyphSelected = true;
         }
         else
-          vtkInteractorStyleTrackballCamera::OnMiddleButtonDown();
+          vtkInteractorStyleTrackballCamera::OnRightButtonDown();
     }
     else
     {
-        content->newmodelKeypoints->InsertID(glyph->pointsIds->GetId(0),glyphIndex);
+        if(symGlyphSelected)
+        {
+            if(glyphIndex < symGlyphIndex)
+            {
+                content->newmodelKeypoints->InsertID(glyph->pointsIds->GetId(0),glyphIndex);
+                content->newmodelKeypoints->InsertID(symGlyph->pointsIds->GetId(0),symGlyphIndex);
+            }
+            else
+            {
+                content->newmodelKeypoints->InsertID(symGlyph->pointsIds->GetId(0),symGlyphIndex);
+                content->newmodelKeypoints->InsertID(glyph->pointsIds->GetId(0),glyphIndex);
+            }
+        }
+        else
+            content->newmodelKeypoints->InsertID(glyph->pointsIds->GetId(0),glyphIndex);
+
         content->newmodelKeypoints->UpdateIdLabels();
 
         glyph->ClearPoints();
@@ -150,7 +167,13 @@ void InteractorStyle::OnMiddleButtonDown()
         glyph->ShowModel();
         glyph->Render();
 
+        symGlyph->ClearPoints();
+        symGlyph->UpdateGlyph();
+        symGlyph->ShowModel();
+        symGlyph->Render();
+
         glyphSelected = false;
+        symGlyphSelected = false;
     }
 }
 
@@ -169,6 +192,21 @@ void InteractorStyle::OnMouseMove()
         glyph->UpdateGlyph();
         glyph->ShowModel();
         glyph->Render();
+
+        if(symetricMode && symGlyphIndex != -1)
+        {
+            symPosition[0] = -picker->GetPickPosition()[0];
+            symPosition[1] = picker->GetPickPosition()[1];
+            symPosition[2] = picker->GetPickPosition()[2];
+
+            vtkIdType symId = content->newModel->kdTree->FindClosestPoint(symPosition);
+
+            symGlyph->ClearPoints();
+            symGlyph->InsertNextID(symId);
+            symGlyph->UpdateGlyph();
+            symGlyph->ShowModel();
+            symGlyph->Render();
+        }
     }
 
     if(drawMode && isDrawing)
@@ -192,11 +230,6 @@ void InteractorStyle::OnKeyPress()
 {
     vtkRenderWindowInteractor *rwi = this->Interactor;
     std::string key = rwi->GetKeySym();
-
-    /*
-    if (key == "s")
-        SaveKeypoint();
-    */
 
     if (key == "a")
         DoAll();
@@ -233,21 +266,6 @@ void InteractorStyle::OnKeyPress()
 
 }
 
-/*
-void InteractorStyle::SaveKeypoint()
-{
-    if(picker->GetActor() == content->newModel->actor && currentKeypoint<content->nbKeypoints)
-    {
-        content->newmodelKeypoints->InsertNextID(glyph->pointsIds->GetId(0));
-        content->newmodelKeypoints->UpdateGlyph();
-        content->newmodelKeypoints->ShowModel();
-
-        currentKeypoint++;
-        UpdateText();
-    }
-}
-*/
-
 void InteractorStyle::ExportBlendshapes(std::string folderPath)
 {
     content->refModel->ExportBlendshapes(folderPath);
@@ -259,11 +277,15 @@ void InteractorStyle::LoadKeypoints(std::string path)
     content->newmodelKeypoints->UpdateIdLabels();
     content->newmodelKeypoints->ShowModel();
     content->newmodelKeypoints->Render();
+
+    if(content->newmodelKeypoints->GetNumberOfPoints() == 60)
+        currentArea = 8;
 }
 
-void InteractorStyle::ExportKeypoints(std::string path)
+void InteractorStyle::SaveKeypoints(std::string path)
 {
-    content->newmodelKeypoints->ExportIDs(path);//"Resources/newKeypoints.txt");
+    if(content->newmodelKeypoints->GetNumberOfPoints() == content->refKeypoints->GetNumberOfPoints())
+        content->newmodelKeypoints->ExportIDs(path);
 }
 
 void InteractorStyle::ExportModel(std::string path)
@@ -277,21 +299,22 @@ void InteractorStyle::ExportModelAndBS(std::string folderPath)
     ExportBlendshapes(folderPath);
 }
 
-/*
+
 void InteractorStyle::UpdateText()
 {
-    if(currentKeypoint<content->nbKeypoints)
+    if(currentArea<drawer->nbShapes)
     {
-        content->text->SetInput(content->keypointsNames[currentKeypoint].c_str());
+        content->text->SetInput(content->areasNames[currentArea].c_str());
         content->text->SetPosition(0,0);
         content->text->GetTextProperty()->SetFontSize(24);
         content->text->GetTextProperty()->SetColor(1.0, 1.0, 1.0);
     }
     else
         content->newmodelRenderer->RemoveActor(content->text);
-    content->newmodelRenderWindow->Render();
+
+     content->newmodelRenderWindow->Render();
 }
-*/
+
 
 void InteractorStyle::DoAll()
 {
@@ -308,7 +331,14 @@ void InteractorStyle::DoAll()
         ToggleAlignedVisibility();
 
         RaycastHead();
+        //MorphModels();
         CylinderRaycast();
+        MorphModels();
+        TextureModels();
+
+        RaycastHead();
+        //MorphModels();
+        CylinderRaycast(2);
         MorphModels();
         TextureModels();
     }
@@ -394,16 +424,27 @@ void InteractorStyle::TextureModels()
     }
 }
 
+
 void InteractorStyle::RaycastHead()
 {
-    raycaster->TopRaycast(content->refKeypoints,content->alignedKeypoints);
+    RaycastHead(1);
+}
+
+void InteractorStyle::RaycastHead(int precision)
+{
+    raycaster->TopRaycast(content->refKeypoints,content->alignedKeypoints,precision);
 
     tpstReady = true;
 }
 
 void InteractorStyle::CylinderRaycast()
 {
-    raycaster->CylindricalRaycast(content->refKeypoints,content->alignedKeypoints);
+    CylinderRaycast(1);
+}
+
+void InteractorStyle::CylinderRaycast(int precision)
+{
+    raycaster->CylindricalRaycast(content->refKeypoints,content->alignedKeypoints,precision);
 
     tpstReady = true;
 }
@@ -414,6 +455,8 @@ void InteractorStyle::FaceDetection()
     faceDetector->DetectAnProject(content->newmodelKeypoints);
     content->newmodelKeypoints->UpdateIdLabels();
     content->newmodelRenderWindow->Render();
+    if(content->newmodelKeypoints->GetNumberOfPoints()>0)
+        currentArea = 8;
 }
 
 void InteractorStyle::CutNewmodel()
@@ -449,8 +492,11 @@ void InteractorStyle::ToggleDrawMode()
 {
     if(drawMode)
         drawMode = false;
-    else
+    else if(currentArea<drawer->nbShapes)
+    {
+        UpdateText();
         drawMode = true;
+    }
 }
 
 vtkStandardNewMacro(InteractorStyle);
