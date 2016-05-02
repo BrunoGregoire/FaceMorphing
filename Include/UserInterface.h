@@ -73,7 +73,6 @@ public slots:
     void RaycastHeadButtonPressed();
     void RaycastButtonPressed();
     void RetextureButtonPressed();
-    void BlendshapsButtonPressed();
 };
 #endif
 

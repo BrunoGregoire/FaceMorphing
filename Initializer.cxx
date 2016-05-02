@@ -9,6 +9,7 @@ Initializer::Initializer()
     raycaster = new Raycaster();
     faceDetector = new FaceDetector("Resources/shape_predictor_68_face_landmarks.dat");
     drawer = new Drawer();
+    cutter = new Cutter();
 }
 
 void Initializer::Init()
@@ -176,6 +177,7 @@ void Initializer::InitNewModel(std::string fileName)
     style->SetRaycaster(raycaster);
     style->SetFaceDetector(faceDetector);
     style->SetDrawer(drawer);
+    style->SetCutter(cutter);
     content->interactor->SetInteractorStyle(style);
     content->style = style;
 

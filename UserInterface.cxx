@@ -423,12 +423,3 @@ void UserInterface::RetextureButtonPressed()
     }
 }
 
-void UserInterface::BlendshapsButtonPressed()
-{
-    if(initializer->newmodelImported)
-    {
-        InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
-        interactor->ComputeBlendshapes();
-    }
-}
-

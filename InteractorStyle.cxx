@@ -58,6 +58,11 @@ void InteractorStyle::SetDrawer(Drawer *_drawer)
     drawer = _drawer;
 }
 
+void InteractorStyle::SetCutter(Cutter *_cutter)
+{
+    cutter = _cutter;
+}
+
 void InteractorStyle::OnLeftButtonDown()
 {
     if(drawMode)
@@ -252,9 +257,6 @@ void InteractorStyle::OnKeyPress()
     if (key == "r")
         CylinderRaycast();
 
-    if (key == "b")
-        ComputeBlendshapes();
-
     if (key == "d")
         FaceDetection();
 
@@ -263,6 +265,20 @@ void InteractorStyle::OnKeyPress()
 
     if (key == "o")
         ToggleDrawMode();
+
+    if (key == "y")
+        InitCutPlane();
+
+    if (key == "Up")
+        CutPlaneUp();
+
+    if (key == "Down")
+        CutPlaneDown();
+
+    if (key == "Return")
+        Cut();
+
+    std::cout<<key<<std::endl;
 
 }
 
@@ -331,13 +347,11 @@ void InteractorStyle::DoAll()
         ToggleAlignedVisibility();
 
         RaycastHead();
-        //MorphModels();
         CylinderRaycast();
         MorphModels();
         TextureModels();
 
         RaycastHead();
-        //MorphModels();
         CylinderRaycast(2);
         MorphModels();
         TextureModels();
@@ -456,17 +470,7 @@ void InteractorStyle::FaceDetection()
     content->newmodelKeypoints->UpdateIdLabels();
     content->newmodelRenderWindow->Render();
     if(content->newmodelKeypoints->GetNumberOfPoints()>0)
-        currentArea = 8;
-}
-
-void InteractorStyle::CutNewmodel()
-{
-
-}
-
-void InteractorStyle::ComputeBlendshapes()
-{
-
+        currentArea = 6;
 }
 
 void InteractorStyle::ResetCameras()
@@ -497,6 +501,29 @@ void InteractorStyle::ToggleDrawMode()
         UpdateText();
         drawMode = true;
     }
+}
+
+void InteractorStyle::InitCutPlane()
+{
+    cutter->InitPlane(content->newModel);
+    cutter->planeModel->Render();
+}
+
+void InteractorStyle::CutPlaneUp()
+{
+    cutter->TranslatePlane(0,3,0);
+}
+
+void InteractorStyle::CutPlaneDown()
+{
+    cutter->TranslatePlane(0,-3,0);
+}
+
+void InteractorStyle::Cut()
+{
+    cutter->Cut(content->refModel);
+    cutter->planeModel->HideModel();
+    ResetCameras();
 }
 
 vtkStandardNewMacro(InteractorStyle);

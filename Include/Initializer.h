@@ -22,6 +22,7 @@
 #include "Raycaster.h"
 #include "FaceDetector.h"
 #include "Drawer.h"
+#include "Cutter.h"
 
 class Initializer
 {
@@ -33,6 +34,7 @@ public:
     Raycaster* raycaster;
     FaceDetector* faceDetector;
     Drawer* drawer;
+    Cutter* cutter;
 
     bool newmodelImported;
 

@@ -22,6 +22,7 @@
 #include "FaceDetector.h"
 #include "Drawer.h"
 #include "KeypointsManager.h"
+#include "Cutter.h"
 
 class InteractorStyle : public vtkInteractorStyleTrackballCamera
 {
@@ -39,6 +40,7 @@ public:
     FaceDetector* faceDetector;
     Drawer* drawer;
     bool drawMode;
+    Cutter* cutter;
 
     bool isDrawing;
     double* drawOrigin;
@@ -68,6 +70,7 @@ public:
     void SetRaycaster (Raycaster* _raycaster);
     void SetFaceDetector (FaceDetector* _faceDetector);
     void SetDrawer (Drawer* _drawer);
+    void SetCutter (Cutter* _cutter);
 
     void OnLeftButtonDown();
     void OnRightButtonDown();
@@ -85,16 +88,18 @@ public:
     void ToggleAlignedVisibility();
     void MorphModels();
     void TextureModels();
-    void ComputeBlendshapes();
     void RaycastHead();
     void RaycastHead(int precision);
     void CylinderRaycast();
     void CylinderRaycast(int precision);
     void FaceDetection();
-    void CutNewmodel();
     void ResetCameras();
     void ToggleDrawMode();
     void DrawCircle();
+    void InitCutPlane();
+    void CutPlaneUp();
+    void CutPlaneDown();
+    void Cut();
 
 };
 
