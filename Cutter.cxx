@@ -48,6 +48,7 @@ void Cutter::Cut(vtkMeshModel* ref)
     mesh->polyData->DeepCopy(clip->GetOutput());
     mesh->ScaleWith(ref);
     mesh->Update();
+    mesh->BuildKdTree();
 
     plane->SetNormal(0, -1, 0);
     clip->SetClipFunction(plane);

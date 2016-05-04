@@ -35,5 +35,5 @@ int KeypointsManager::GetSymmetric(int keypoint)
     else if(keypoint<=65)
         return keypoint-3;
 
-    return -2;
+    return -1;
 }

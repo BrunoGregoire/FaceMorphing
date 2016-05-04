@@ -21,8 +21,8 @@
 class Drawer
 {
 public:
-    int nbShapes = 7;
-    vtk2DModel* shapes[7];
+    int nbShapes = 8;
+    vtk2DModel* shapes[8];
 
     vtk2DModel* DrawShape(double* origin, double* end, int shapeIndex);
     vtk2DModel* DrawCircle(double* origin, double* end);

@@ -3,7 +3,9 @@
 
 vtk2DModel* Drawer::DrawShape(double* origin, double* end, int shapeIndex)
 {
-    if(shapeIndex == 0 || shapeIndex>3)
+    if(shapeIndex == 7)
+        return DrawLine(origin,end,5);
+    else if(shapeIndex == 0 || shapeIndex>3)
         return DrawCircle(origin,end);
     else if(shapeIndex == 1 || shapeIndex == 3)
         return DrawLine(origin,end,5);
@@ -273,6 +275,9 @@ void Drawer::ProjectPoints(int area, vtkGlyphModel* glyphModel)
 
                 if(i!=1)
                 {
+                    if(i>1)
+                        index = step*(5-i);
+
                     double* point = polyData->GetPoint(index);
                     vtkSmartPointer<vtkCellPicker> picker = vtkSmartPointer<vtkCellPicker>::New();
                     picker->Pick(point[0],point[1],0,glyphModel->renderer);
@@ -293,6 +298,34 @@ void Drawer::ProjectPoints(int area, vtkGlyphModel* glyphModel)
             }
 
             ProjectSymetrics(points,positions,glyphModel);
+
+            break;
+        }
+
+        case 7: // Back head
+        {
+            vtkSmartPointer<vtkPolyData> polyData = shapes[7]->polyData;
+            glyphModel->mesh->BuildKdTree();
+
+            double* origin = polyData->GetPoint(0);
+            double originY = origin[1];
+            double* end = polyData->GetPoint(3);
+            double endY = end[1];
+
+            for(int i=0;i<5;i++)
+            {
+                int index;
+                if(originY>endY)
+                    index = i;
+                else
+                    index = 4-i;
+
+                double* point = polyData->GetPoint(index);
+                vtkSmartPointer<vtkCellPicker> picker = vtkSmartPointer<vtkCellPicker>::New();
+                picker->Pick(point[0],point[1],0,glyphModel->renderer);
+                vtkIdType id = glyphModel->mesh->kdTree->FindClosestPoint(picker->GetPickPosition());
+                glyphModel->InsertNextID(id);
+            }
 
             break;
         }

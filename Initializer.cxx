@@ -109,7 +109,7 @@ void Initializer::Init()
     content->refModel->LoadBlendshapes("Models/Ref/BS/");
 
     // INIT KEYPOINTS AREAS NAMES
-    content->areasNames = new std::string[7];
+    content->areasNames = new std::string[8];
     content->areasNames[0] = "Draw circle for the face";
     content->areasNames[1] = "Draw line for the right eyebrow";
     content->areasNames[2] = "Draw vertical line for the Nose";
@@ -117,6 +117,7 @@ void Initializer::Init()
     content->areasNames[4] = "Draw circle around the right eye";
     content->areasNames[5] = "Draw circle around the mouth";
     content->areasNames[6] = "Draw circle around the right ear";
+    content->areasNames[7] = "Draw line behind the head";
 
     // INIT REF KEYPOINTS
     content->refKeypoints = new vtkGlyphModel(content->refModel);

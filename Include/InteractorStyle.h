@@ -95,6 +95,7 @@ public:
     void FaceDetection();
     void ResetCameras();
     void ToggleDrawMode();
+    void CancelDrawing();
     void DrawCircle();
     void InitCutPlane();
     void CutPlaneUp();

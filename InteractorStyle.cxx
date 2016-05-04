@@ -149,6 +149,7 @@ void InteractorStyle::OnRightButtonDown()
     }
     else
     {
+        std::cout<<"DEBUG 0"<<std::endl;
         if(symGlyphSelected)
         {
             if(glyphIndex < symGlyphIndex)
@@ -163,20 +164,28 @@ void InteractorStyle::OnRightButtonDown()
             }
         }
         else
+        {
+            std::cout<<"DEBUG"<<std::endl;
             content->newmodelKeypoints->InsertID(glyph->pointsIds->GetId(0),glyphIndex);
+            std::cout<<"DEBUG"<<std::endl;
+        }
 
+        std::cout<<"DEBUG"<<std::endl;
         content->newmodelKeypoints->UpdateIdLabels();
 
+        std::cout<<"DEBUG"<<std::endl;
         glyph->ClearPoints();
         glyph->UpdateGlyph();
         glyph->ShowModel();
         glyph->Render();
 
+        std::cout<<"DEBUG"<<std::endl;
         symGlyph->ClearPoints();
         symGlyph->UpdateGlyph();
         symGlyph->ShowModel();
         symGlyph->Render();
 
+        std::cout<<"DEBUG"<<std::endl;
         glyphSelected = false;
         symGlyphSelected = false;
     }
@@ -230,11 +239,12 @@ void InteractorStyle::OnMouseMove()
     vtkInteractorStyleTrackballCamera::OnMouseMove();
 }
 
-
 void InteractorStyle::OnKeyPress()
 {
     vtkRenderWindowInteractor *rwi = this->Interactor;
     std::string key = rwi->GetKeySym();
+
+    std::cout<<key<<std::endl;
 
     if (key == "a")
         DoAll();
@@ -262,6 +272,9 @@ void InteractorStyle::OnKeyPress()
 
     if (key == "c")
         ResetCameras();
+
+    if (key == "Escape")
+        CancelDrawing();
 
     if (key == "o")
         ToggleDrawMode();
@@ -295,13 +308,14 @@ void InteractorStyle::LoadKeypoints(std::string path)
     content->newmodelKeypoints->Render();
 
     if(content->newmodelKeypoints->GetNumberOfPoints() == 60)
-        currentArea = 8;
+        currentArea = 6;
+    else if(content->newmodelKeypoints->GetNumberOfPoints() == 66)
+        currentArea = 7;
 }
 
 void InteractorStyle::SaveKeypoints(std::string path)
 {
-    if(content->newmodelKeypoints->GetNumberOfPoints() == content->refKeypoints->GetNumberOfPoints())
-        content->newmodelKeypoints->ExportIDs(path);
+    content->newmodelKeypoints->ExportIDs(path);
 }
 
 void InteractorStyle::ExportModel(std::string path)
@@ -314,7 +328,6 @@ void InteractorStyle::ExportModelAndBS(std::string folderPath)
     content->refModel->ExportAsOBJ(folderPath+"result");
     ExportBlendshapes(folderPath);
 }
-
 
 void InteractorStyle::UpdateText()
 {
@@ -330,7 +343,6 @@ void InteractorStyle::UpdateText()
 
      content->newmodelRenderWindow->Render();
 }
-
 
 void InteractorStyle::DoAll()
 {
@@ -438,7 +450,6 @@ void InteractorStyle::TextureModels()
     }
 }
 
-
 void InteractorStyle::RaycastHead()
 {
     RaycastHead(1);
@@ -495,11 +506,26 @@ void InteractorStyle::ResetCameras()
 void InteractorStyle::ToggleDrawMode()
 {
     if(drawMode)
+    {
+        CancelDrawing();
+        content->text->SetInput("");
+        content->newmodelRenderWindow->Render();
         drawMode = false;
+    }
     else if(currentArea<drawer->nbShapes)
     {
         UpdateText();
         drawMode = true;
+    }
+}
+
+void InteractorStyle::CancelDrawing()
+{
+    if(drawMode && isDrawing)
+    {
+        isDrawing = false;
+        currentShape->HideModel();
+        currentShape->Render();
     }
 }
 

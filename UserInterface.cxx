@@ -65,6 +65,18 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     groupBox->setLayoutDirection(Qt::RightToLeft);
     groupBox->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
 
+    DrawButton = new QPushButton(groupBox);
+    DrawButton->setObjectName(QStringLiteral("DrawButton"));
+    DrawButton->setGeometry(QRect(0, 0, 51, 51));
+    DrawButton->setToolTip(QStringLiteral("Draw shapes to find key points"));
+    DrawButton->setToolTipDuration(-1);
+    QIcon DrawIcon;
+    drawButtonOn = false;
+    DrawIcon.addFile(QStringLiteral("Icons/DrawIconOff.png"), QSize(), QIcon::Normal, QIcon::Off);
+    DrawButton->setIcon(DrawIcon);
+    DrawButton->setIconSize(QSize(45, 45));
+    QObject::connect(DrawButton,SIGNAL(pressed()),this,SLOT(DrawButtonPressed()));
+
     AllButton = new QPushButton(groupBox);
     AllButton->setObjectName(QStringLiteral("AllButton"));
     AllButton->setGeometry(QRect(0, 50, 51, 51));
@@ -109,16 +121,16 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     MorphButton->setIconSize(QSize(45, 45));
     QObject::connect(MorphButton,SIGNAL(pressed()),this,SLOT(MorphButtonPressed()));
 
-    DlibButton = new QPushButton(groupBox);
-    DlibButton->setObjectName(QStringLiteral("DlibButton"));
-    DlibButton->setGeometry(QRect(0, 250, 51, 51));
-    DlibButton->setToolTip(QStringLiteral("Automatically find new landmarks thanks to face detetction/recognition (l)"));
-    DlibButton->setToolTipDuration(-1);
-    QIcon DlibIcon;
-    DlibIcon.addFile(QStringLiteral("Icons/DlibIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
-    DlibButton->setIcon(DlibIcon);
-    DlibButton->setIconSize(QSize(45, 45));
-    QObject::connect(DlibButton,SIGNAL(pressed()),this,SLOT(DlibButtonPressed()));
+    FaceButton = new QPushButton(groupBox);
+    FaceButton->setObjectName(QStringLiteral("DlibButton"));
+    FaceButton->setGeometry(QRect(0, 250, 51, 51));
+    FaceButton->setToolTip(QStringLiteral("Automatically find new landmarks thanks to face detetction/recognition (l)"));
+    FaceButton->setToolTipDuration(-1);
+    QIcon FaceIcon;
+    FaceIcon.addFile(QStringLiteral("Icons/DlibIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
+    FaceButton->setIcon(FaceIcon);
+    FaceButton->setIconSize(QSize(45, 45));
+    QObject::connect(FaceButton,SIGNAL(pressed()),this,SLOT(DlibButtonPressed()));
 
     RaycastHeadButton = new QPushButton(groupBox);
     RaycastHeadButton->setObjectName(QStringLiteral("RaycastButton"));
@@ -152,17 +164,6 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     RetextureButton->setIcon(TextureIcon);
     RetextureButton->setIconSize(QSize(45, 45));
     QObject::connect(RetextureButton,SIGNAL(pressed()),this,SLOT(RetextureButtonPressed()));
-
-    BlendshapsButton = new QPushButton(groupBox);
-    BlendshapsButton->setObjectName(QStringLiteral("BlendshapsButton"));
-    BlendshapsButton->setGeometry(QRect(0, 450, 51, 51));
-    BlendshapsButton->setToolTip(QStringLiteral("Compute the blend shapes for the morphed model (b)"));
-    BlendshapsButton->setToolTipDuration(-1);
-    QIcon BlendshapesIcon;
-    BlendshapesIcon.addFile(QStringLiteral("Icons/Blendshapes.png"), QSize(), QIcon::Normal, QIcon::Off);
-    BlendshapsButton->setIcon(BlendshapesIcon);
-    BlendshapsButton->setIconSize(QSize(45, 45));
-    QObject::connect(BlendshapsButton,SIGNAL(pressed()),this,SLOT(BlendshapsButtonPressed()));
 
     horizontalLayout->addWidget(groupBox);
 
@@ -340,16 +341,38 @@ void UserInterface::ExportAllButtonPressed()
     }
 }
 
-/*
-void UserInterface::SavePointButtonPressed()
+void UserInterface::DrawButtonPressed()
 {
     if(initializer->newmodelImported)
     {
         InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
-        interactor->SaveKeypoint();
+        interactor->ToggleDrawMode();
+
+        QIcon DrawIcon;
+
+        if(drawButtonOn)
+        {
+            drawButtonOn = false;
+            DrawIcon.addFile(QStringLiteral("Icons/DrawIconOff.png"), QSize(), QIcon::Normal, QIcon::Off);
+        }
+        else
+        {
+            drawButtonOn = true;
+            DrawIcon.addFile(QStringLiteral("Icons/DrawIconOn.png"), QSize(), QIcon::Normal, QIcon::Off);
+        }
+
+        DrawButton->setIcon(DrawIcon);
     }
 }
-*/
+
+void UserInterface::AllButtonPressed()
+{
+    if(initializer->newmodelImported)
+    {
+        InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
+        interactor->DoAll();
+    }
+}
 
 void UserInterface::AlignButtonPressed()
 {
@@ -366,15 +389,6 @@ void UserInterface::ToggleVisibilityButtonPressed()
     {
         InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
         interactor->ToggleAlignedVisibility();
-    }
-}
-
-void UserInterface::AllButtonPressed()
-{
-    if(initializer->newmodelImported)
-    {
-        InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
-        interactor->DoAll();
     }
 }
 

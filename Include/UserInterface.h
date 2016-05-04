@@ -31,22 +31,27 @@ public:
     QAction *actionExport_model;
     QAction *actionExport_blend_shapes;
     QAction *actionExport_all;
+
     QWidget *centralwidget;
     QGridLayout *gridLayout;
     QVBoxLayout *verticalLayout;
     QHBoxLayout *horizontalLayout;
+
     QGroupBox *groupBox;
+    QPushButton *DrawButton;
+    bool drawButtonOn;
     QPushButton *AllButton;
     QPushButton *AlignButton;
     QPushButton *ToggleVisibilityButton;
     QPushButton *MorphButton;
-    QPushButton *DlibButton;
+    QPushButton *FaceButton;
     QPushButton *RaycastHeadButton;
     QPushButton *RaycastButton;
     QPushButton *RetextureButton;
-    QPushButton *BlendshapsButton;
+
     QVTKWidget *RefQvtkWidget;
     QVTKWidget *NewmodelQvtkWidget;
+
     QMenuBar *menubar;
     QMenu *menuFile;
     QStatusBar *statusbar;
@@ -65,9 +70,11 @@ public slots:
     void ExportModelButtonPressed();
     void ExportBsButtonPressed();
     void ExportAllButtonPressed();
+
+    void DrawButtonPressed();
+    void AllButtonPressed();
     void AlignButtonPressed();
     void ToggleVisibilityButtonPressed();
-    void AllButtonPressed();
     void MorphButtonPressed();
     void DlibButtonPressed();
     void RaycastHeadButtonPressed();
