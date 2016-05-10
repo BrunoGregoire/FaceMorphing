@@ -1,0 +1,23 @@
+
+
+
+prefered = array of nb ref points int 
+(index of the prefered point in the new model polydata) 
+
+For each point i of the reference model :
+	find the closest one in the aligned model :
+		put it into prefered[i]
+		
+dest = array of nb ref points double[]
+		
+For each point i of the reference model : 
+	if prefered[i] doesn't appear somewhere else in the prefered array :
+		dest[i] <- prefered[i]
+	else :
+		if distance between i and prefered[i] is the smallest :
+			dest[i] <- prefered[i]
+		else :
+			...
+
+
+			

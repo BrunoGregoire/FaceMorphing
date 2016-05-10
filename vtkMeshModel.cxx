@@ -83,6 +83,11 @@ void vtkMeshModel::Center()
     filter->Update();
 
     polyData->DeepCopy(filter->GetPolyDataOutput());
+
+    for(int i=0;i<linkedMeshes.size();i++)
+    {
+        linkedMeshes[i]->ApplyTransform(transform);
+    }
 }
 
 void vtkMeshModel::Texture(vtkSmartPointer<vtkTexture> _texture)
@@ -107,6 +112,11 @@ void vtkMeshModel::ScaleWith(vtkMeshModel *otherMesh)
     filter->Update();
 
     polyData = filter->GetPolyDataOutput();
+
+    for(int i=0;i<linkedMeshes.size();i++)
+    {
+        linkedMeshes[i]->ApplyTransform(transform);
+    }
 }
 
 void vtkMeshModel::BuildKdTree()
@@ -251,4 +261,9 @@ void vtkMeshModel::TextureBlendshapes()
 
         blendshapes[i]->GetPointData()->SetTCoords(newTCoords);
     }
+}
+
+void vtkMeshModel::AddLink(vtkMeshModel *mesh)
+{
+    linkedMeshes.push_back(mesh);
 }

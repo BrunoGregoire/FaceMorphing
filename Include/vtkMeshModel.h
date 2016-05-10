@@ -32,6 +32,8 @@ public:
     std::vector<std::string> bsNames;
     std::vector<vtkSmartPointer<vtkPolyData>> blendshapes;
 
+    std::vector<vtkMeshModel*> linkedMeshes;
+
     vtkMeshModel();
 
     void ReadFromOBJ(std::string fileName);
@@ -49,6 +51,8 @@ public:
     void TransformBlendshapes(vtkSmartPointer<vtkAbstractTransform> transform);
     void ExportBlendshapes(std::string folderPath);
     void TextureBlendshapes();
+    void AddLink(vtkMeshModel* mesh);
+    //void Triangulate();
 };
 
 #endif

@@ -11,6 +11,10 @@ INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDES})
 ADD_DEFINITIONS(${Qt5Widgets_DEFINITIONS})
 SET(CMAKE_CXX_FLAGS "${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
+#find itk
+find_package(ITK REQUIRED)
+include(${ITK_USE_FILE})
+
 #find vtk
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
@@ -47,10 +51,17 @@ add_executable(FaceMorphing MACOSX_BUNDLE Main
     Drawer
     KeypointsManager
     Cutter
+    Matcher
+    Parameterizer
+    vtkPolyDataToitkMesh
+    itkMeshTovtkPolyData
     ${INC_ALL})
  
 #link with qt
 TARGET_LINK_LIBRARIES(FaceMorphing ${Qt5Widgets_LIBRARIES})
+
+#link with itk
+TARGET_LINK_LIBRARIES(FaceMorphing ${ITK_LIBRARIES})
 
 #link with vtk
 if(VTK_LIBRARIES)

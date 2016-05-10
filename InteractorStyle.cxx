@@ -291,6 +291,25 @@ void InteractorStyle::OnKeyPress()
     if (key == "Return")
         Cut();
 
+    if (key == "comma")
+    {
+        vtkSmartPointer<vtkRenderWindow> tempRenderWindow =  vtkSmartPointer<vtkRenderWindow>::New();
+        vtkSmartPointer<vtkRenderer> tempRenderer = vtkSmartPointer<vtkRenderer>::New();
+        tempRenderWindow->AddRenderer(tempRenderer);
+
+        std::cout << "DEBUG -1" << std::endl;
+        vtkMeshModel* param = Parameterizer::PlanarParameterization(content->newModel);
+        std::cout << "DEBUG 11" << std::endl;
+        param->SetRenderer(tempRenderer);
+        param->SetRenderWindow(tempRenderWindow);
+        param->actor->GetProperty()->SetRepresentationToWireframe();
+        std::cout << "DEBUG 12" << std::endl;
+        param->ShowModel();
+        std::cout << "DEBUG 13" << std::endl;
+        param->Render();
+        std::cout << "DEBUG 14" << std::endl;
+    }
+
     std::cout<<key<<std::endl;
 
 }
@@ -353,7 +372,7 @@ void InteractorStyle::DoAll()
             AlignModels();
             RaycastHead();
             MorphModels();
-            tpst->basis = tpst->Basis::R;
+            //tpst->basis = tpst->Basis::R;
         }
 
         ToggleAlignedVisibility();

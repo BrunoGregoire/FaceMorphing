@@ -23,6 +23,8 @@
 #include "Drawer.h"
 #include "KeypointsManager.h"
 #include "Cutter.h"
+#include "Matcher.h"
+#include "Parameterizer.h"
 
 class InteractorStyle : public vtkInteractorStyleTrackballCamera
 {
