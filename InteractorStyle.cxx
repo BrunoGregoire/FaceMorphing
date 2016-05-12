@@ -149,7 +149,6 @@ void InteractorStyle::OnRightButtonDown()
     }
     else
     {
-        std::cout<<"DEBUG 0"<<std::endl;
         if(symGlyphSelected)
         {
             if(glyphIndex < symGlyphIndex)
@@ -165,27 +164,20 @@ void InteractorStyle::OnRightButtonDown()
         }
         else
         {
-            std::cout<<"DEBUG"<<std::endl;
             content->newmodelKeypoints->InsertID(glyph->pointsIds->GetId(0),glyphIndex);
-            std::cout<<"DEBUG"<<std::endl;
         }
-
-        std::cout<<"DEBUG"<<std::endl;
         content->newmodelKeypoints->UpdateIdLabels();
 
-        std::cout<<"DEBUG"<<std::endl;
         glyph->ClearPoints();
         glyph->UpdateGlyph();
         glyph->ShowModel();
         glyph->Render();
 
-        std::cout<<"DEBUG"<<std::endl;
         symGlyph->ClearPoints();
         symGlyph->UpdateGlyph();
         symGlyph->ShowModel();
         symGlyph->Render();
 
-        std::cout<<"DEBUG"<<std::endl;
         glyphSelected = false;
         symGlyphSelected = false;
     }
@@ -293,6 +285,10 @@ void InteractorStyle::OnKeyPress()
 
     if (key == "comma")
     {
+        Matcher::MatchPerfecty(content->refModel,content->alignedModel);
+        content->refModel->Render();
+
+        /*
         vtkSmartPointer<vtkRenderWindow> tempRenderWindow =  vtkSmartPointer<vtkRenderWindow>::New();
         vtkSmartPointer<vtkRenderer> tempRenderer = vtkSmartPointer<vtkRenderer>::New();
         tempRenderWindow->AddRenderer(tempRenderer);
@@ -308,6 +304,7 @@ void InteractorStyle::OnKeyPress()
         std::cout << "DEBUG 13" << std::endl;
         param->Render();
         std::cout << "DEBUG 14" << std::endl;
+        */
     }
 
     std::cout<<key<<std::endl;

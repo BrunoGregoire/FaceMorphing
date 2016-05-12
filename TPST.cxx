@@ -3,7 +3,8 @@
 TPST::TPST()
 {
     tpst = vtkSmartPointer<vtkThinPlateSplineTransform>::New();
-    basis = Basis::R2LogR;
+    //basis = Basis::R2LogR;
+    basis = Basis::R;
 }
 
 void TPST::Morph(vtkGlyphModel *sourceKeypoints, vtkGlyphModel *targetKeypoints)
