@@ -108,6 +108,10 @@ void Initializer::Init()
 
     content->refModel->LoadBlendshapes("Models/Ref/BS/");
 
+    // TRIANGULATE THE MESH AND THE BSs
+    content->refModel->Triangulate();
+    content->refModel->Update();
+
     // INIT KEYPOINTS AREAS NAMES
     content->areasNames = new std::string[8];
     content->areasNames[0] = "Draw circle for the face";
@@ -125,6 +129,9 @@ void Initializer::Init()
     content->refKeypoints->ShowModel();
     content->refKeypoints->UpdateIdLabels();
 
+    content->customRefKeypoints = vtkSmartPointer<vtkIdList>::New();
+    content->customRefKeypoints->DeepCopy(content->refKeypoints->pointsIds);
+
     // INIT REF AXIS
     double* origin = new double[3];
     double* end = new double[3];
@@ -140,6 +147,13 @@ void Initializer::Init()
     content->refAxis->UpdateLine();
     content->refAxis->ShowModel();
     content->refModel->axis = content->refAxis;
+
+    // INIT INTERACTOR
+    content->refInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+    content->refInteractor->SetRenderWindow(content->refRenderWindow);
+    vtkSmartPointer<RefInteractorStyle> refStyle = vtkSmartPointer<RefInteractorStyle>::New();
+    refStyle->SetContent(content);
+    content->refInteractor->SetInteractorStyle(refStyle);
 
     newmodelImported = false;
 }
@@ -163,13 +177,17 @@ void Initializer::InitNewModel(std::string fileName)
     content->newModel->SetRenderWindow(content->newmodelRenderWindow);
     content->newModel->ShowModel();
 
+    // TRIANGULATE NEW MODEL
+    content->newModel->Triangulate();
+    content->newModel->Update();
+
     // INIT NEW MODEL KEYPOINTS
     content->newmodelKeypoints = new vtkGlyphModel(content->newModel);
     content->newmodelKeypoints->SetColor(0,1,0);
 
     // INIT INTERACTOR
-    content->interactor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
-    content->interactor->SetRenderWindow(content->newmodelRenderWindow);
+    content->newmodelInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+    content->newmodelInteractor->SetRenderWindow(content->newmodelRenderWindow);
     vtkSmartPointer<InteractorStyle> style = vtkSmartPointer<InteractorStyle>::New();
     style->SetContent(content);
     style->SetICP(icp);
@@ -179,7 +197,7 @@ void Initializer::InitNewModel(std::string fileName)
     style->SetFaceDetector(faceDetector);
     style->SetDrawer(drawer);
     style->SetCutter(cutter);
-    content->interactor->SetInteractorStyle(style);
+    content->newmodelInteractor->SetInteractorStyle(style);
     content->style = style;
 
     newmodelImported = true;

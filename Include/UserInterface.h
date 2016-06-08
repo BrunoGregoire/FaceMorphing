@@ -38,16 +38,14 @@ public:
     QHBoxLayout *horizontalLayout;
 
     QGroupBox *groupBox;
-    QPushButton *DrawButton;
     bool drawButtonOn;
-    QPushButton *AllButton;
-    QPushButton *AlignButton;
-    QPushButton *ToggleVisibilityButton;
-    QPushButton *MorphButton;
+
+    QPushButton *DrawButton;
     QPushButton *FaceButton;
-    QPushButton *RaycastHeadButton;
-    QPushButton *RaycastButton;
-    QPushButton *RetextureButton;
+    QPushButton *ToggleVisibilityButton;
+
+    QPushButton *AlignButton;
+    QPushButton *NextIterationButton;
 
     QVTKWidget *RefQvtkWidget;
     QVTKWidget *NewmodelQvtkWidget;
@@ -57,7 +55,6 @@ public:
     QStatusBar *statusbar;
 
     void setupUi(QMainWindow *MainWindow);
-
     void retranslateUi(QMainWindow *MainWindow);
 
 public slots:
@@ -72,14 +69,11 @@ public slots:
     void ExportAllButtonPressed();
 
     void DrawButtonPressed();
-    void AllButtonPressed();
-    void AlignButtonPressed();
-    void ToggleVisibilityButtonPressed();
-    void MorphButtonPressed();
     void DlibButtonPressed();
-    void RaycastHeadButtonPressed();
-    void RaycastButtonPressed();
-    void RetextureButtonPressed();
+    void ToggleVisibilityButtonPressed();
+
+    void AlignButtonPressed();
+    void NewIterationButtonPressed();
 };
 #endif
 

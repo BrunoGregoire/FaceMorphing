@@ -15,6 +15,7 @@
 
 #include "vtkModel.h"
 #include "Content.h"
+#include "RefInteractorStyle.h"
 #include "InteractorStyle.h"
 #include "ICP.h"
 #include "TPST.h"

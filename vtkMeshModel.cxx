@@ -133,6 +133,13 @@ void vtkMeshModel::BuildObbTree()
     obbTree->BuildLocator();
 }
 
+void vtkMeshModel::BuildCellLocator()
+{
+    cellLocator = vtkSmartPointer<vtkCellLocator>::New();
+    cellLocator->SetDataSet(polyData);
+    cellLocator->BuildLocator();
+}
+
 vtkMeshModel* vtkMeshModel::Copy()
 {
     vtkMeshModel* copy = new vtkMeshModel();
@@ -266,4 +273,66 @@ void vtkMeshModel::TextureBlendshapes()
 void vtkMeshModel::AddLink(vtkMeshModel *mesh)
 {
     linkedMeshes.push_back(mesh);
+}
+
+void vtkMeshModel::Triangulate()
+{
+    vtkSmartPointer<vtkTriangleFilter> triangleFilter = vtkSmartPointer<vtkTriangleFilter>::New();
+    triangleFilter->SetInputData(polyData);
+    triangleFilter->Update();
+    polyData->DeepCopy(triangleFilter->GetOutput());
+
+    if(blendshapes.size()>0)
+    {
+        for(int i=0;i<blendshapes.size();i++)
+        {
+            vtkSmartPointer<vtkTriangleFilter> filter = vtkSmartPointer<vtkTriangleFilter>::New();
+            filter->SetInputData(blendshapes[i]);
+            filter->Update();
+            blendshapes[i]->DeepCopy(filter->GetOutput());
+        }
+    }
+}
+
+void vtkMeshModel::Smooth()
+{
+    vtkSmartPointer<vtkSmoothPolyDataFilter> smoothFilter = vtkSmartPointer<vtkSmoothPolyDataFilter>::New();
+    smoothFilter->SetInputData(polyData);
+    smoothFilter->SetNumberOfIterations(20);
+    smoothFilter->SetRelaxationFactor(0.2);
+    smoothFilter->FeatureEdgeSmoothingOn();
+    smoothFilter->BoundarySmoothingOn();
+    smoothFilter->Update();
+
+    polyData->DeepCopy(smoothFilter->GetOutput());
+}
+
+void vtkMeshModel::ComputeNormals()
+{
+    // Update normals on newly smoothed polydata
+    vtkSmartPointer<vtkPolyDataNormals> normalGenerator = vtkSmartPointer<vtkPolyDataNormals>::New();
+    normalGenerator->SetInputData(polyData);
+    normalGenerator->ComputePointNormalsOn();
+    normalGenerator->ComputeCellNormalsOff();
+    normalGenerator->SplittingOff();
+    normalGenerator->Update();
+
+    polyData->DeepCopy(normalGenerator->GetOutput());
+}
+
+void vtkMeshModel::Reorganize()
+{
+
+}
+
+void vtkMeshModel::ComputeCurvatures()
+{
+    vtkSmartPointer<vtkCurvatures> curvaturesFilter = vtkSmartPointer<vtkCurvatures>::New();
+    curvaturesFilter->SetInputData(polyData);
+    curvaturesFilter->SetCurvatureTypeToMinimum();
+    curvaturesFilter->SetCurvatureTypeToMaximum();
+    curvaturesFilter->SetCurvatureTypeToMean();
+    curvaturesFilter->Update();
+
+    curvatures = curvaturesFilter->GetOutput()->GetPointData()->GetScalars();
 }

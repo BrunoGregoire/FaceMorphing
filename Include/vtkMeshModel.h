@@ -21,18 +21,21 @@ class vtkMeshModel : public vtkModel
 {
 public:
     vtkSmartPointer<vtkTexture> texture;
+
     vtkSmartPointer<vtkKdTreePointLocator> kdTree;
+    vtkSmartPointer<vtkOBBTree> obbTree;
+    vtkSmartPointer<vtkCellLocator> cellLocator;
 
     vtkLineModel* axis;
     vtkSmartPointer<vtkMatrix4x4> axisTransMat;
     vtkSmartPointer<vtkTransform> axisTransform;
 
-    vtkSmartPointer<vtkOBBTree> obbTree;
-
     std::vector<std::string> bsNames;
     std::vector<vtkSmartPointer<vtkPolyData>> blendshapes;
 
     std::vector<vtkMeshModel*> linkedMeshes;
+
+    vtkSmartPointer<vtkDataArray> curvatures;
 
     vtkMeshModel();
 
@@ -44,6 +47,7 @@ public:
     void ScaleWith(vtkMeshModel* otherMesh);
     void BuildKdTree();
     void BuildObbTree();
+    void BuildCellLocator();
     vtkMeshModel* Copy();
     void ComputeAxisTransform();
     double* TransformAlongAxis(double* point);
@@ -52,7 +56,11 @@ public:
     void ExportBlendshapes(std::string folderPath);
     void TextureBlendshapes();
     void AddLink(vtkMeshModel* mesh);
-    //void Triangulate();
+    void Triangulate();
+    void Smooth();
+    void ComputeNormals();
+    void Reorganize();
+    void ComputeCurvatures();
 };
 
 #endif

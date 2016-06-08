@@ -63,3 +63,9 @@
 #include <vtkPolyLine.h>
 #include <vtkPolyDataWriter.h>
 #include <vtkPolyDataReader.h>
+#include <vtkSurfaceReconstructionFilter.h>
+#include <vtkContourFilter.h>
+#include <vtkReverseSense.h>
+#include <vtkDelaunay2D.h>
+#include <vtkCurvatures.h>
+#include <vtkCellLocator.h>

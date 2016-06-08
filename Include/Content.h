@@ -24,6 +24,9 @@ public:
     vtkMeshModel* newModel;
     vtkMeshModel* alignedModel;
 
+    vtkSmartPointer<vtkIdList> customRefKeypoints;
+    vtkSmartPointer<vtkIdList> customNewmodelKeypoints;
+
     int nbKeypoints;
     std::string* areasNames;
     vtkGlyphModel* refKeypoints;
@@ -37,7 +40,8 @@ public:
     vtkSmartPointer<vtkRenderWindow> refRenderWindow;
     vtkSmartPointer<vtkRenderWindow> newmodelRenderWindow;
 
-    vtkSmartPointer<vtkRenderWindowInteractor> interactor;
+    vtkSmartPointer<vtkRenderWindowInteractor> refInteractor;
+    vtkSmartPointer<vtkRenderWindowInteractor> newmodelInteractor;
     vtkSmartPointer<vtkInteractorStyle> style;
 
     vtkSmartPointer<vtkTextActor> text;

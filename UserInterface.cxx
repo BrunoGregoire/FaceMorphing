@@ -68,7 +68,7 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     DrawButton = new QPushButton(groupBox);
     DrawButton->setObjectName(QStringLiteral("DrawButton"));
     DrawButton->setGeometry(QRect(0, 0, 51, 51));
-    DrawButton->setToolTip(QStringLiteral("Draw shapes to find key points"));
+    DrawButton->setToolTip(QStringLiteral("Draw shapes to select key points"));
     DrawButton->setToolTipDuration(-1);
     QIcon DrawIcon;
     drawButtonOn = false;
@@ -77,53 +77,9 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     DrawButton->setIconSize(QSize(45, 45));
     QObject::connect(DrawButton,SIGNAL(pressed()),this,SLOT(DrawButtonPressed()));
 
-    AllButton = new QPushButton(groupBox);
-    AllButton->setObjectName(QStringLiteral("AllButton"));
-    AllButton->setGeometry(QRect(0, 50, 51, 51));
-    AllButton->setToolTip(QStringLiteral("Perform all the morphing based on the selected key points (a)"));
-    AllButton->setToolTipDuration(-1);
-    QIcon AllIcon;
-    AllIcon.addFile(QStringLiteral("Icons/AllIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
-    AllButton->setIcon(AllIcon);
-    AllButton->setIconSize(QSize(45, 45));
-    QObject::connect(AllButton,SIGNAL(pressed()),this,SLOT(AllButtonPressed()));
-
-    AlignButton = new QPushButton(groupBox);
-    AlignButton->setObjectName(QStringLiteral("AlignButton"));
-    AlignButton->setGeometry(QRect(0, 100, 51, 51));
-    AlignButton->setToolTip(QStringLiteral("Align models (t)"));
-    AlignButton->setToolTipDuration(-1);
-    QIcon AlignIcon;
-    AlignIcon.addFile(QStringLiteral("Icons/AlignIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
-    AlignButton->setIcon(AlignIcon);
-    AlignButton->setIconSize(QSize(45, 45));
-    QObject::connect(AlignButton,SIGNAL(pressed()),this,SLOT(AlignButtonPressed()));
-
-    ToggleVisibilityButton = new QPushButton(groupBox);
-    ToggleVisibilityButton->setObjectName(QStringLiteral("ToggleVisibilityButton"));
-    ToggleVisibilityButton->setGeometry(QRect(0, 150, 51, 51));
-    ToggleVisibilityButton->setToolTip(QStringLiteral("Toggle aligned model visibility (v)"));
-    ToggleVisibilityButton->setToolTipDuration(-1);
-    QIcon ToggleVisibilityIcon;
-    ToggleVisibilityIcon.addFile(QStringLiteral("Icons/ToggleVisibilityIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
-    ToggleVisibilityButton->setIcon(ToggleVisibilityIcon);
-    ToggleVisibilityButton->setIconSize(QSize(45, 45));
-    QObject::connect(ToggleVisibilityButton,SIGNAL(pressed()),this,SLOT(ToggleVisibilityButtonPressed()));
-
-    MorphButton = new QPushButton(groupBox);
-    MorphButton->setObjectName(QStringLiteral("MorphButton"));
-    MorphButton->setGeometry(QRect(0, 200, 51, 51));
-    MorphButton->setToolTip(QStringLiteral("Morph the ref into the new model (m)"));
-    MorphButton->setToolTipDuration(-1);
-    QIcon MorphIcon;
-    MorphIcon.addFile(QStringLiteral("Icons/MorphIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
-    MorphButton->setIcon(MorphIcon);
-    MorphButton->setIconSize(QSize(45, 45));
-    QObject::connect(MorphButton,SIGNAL(pressed()),this,SLOT(MorphButtonPressed()));
-
     FaceButton = new QPushButton(groupBox);
     FaceButton->setObjectName(QStringLiteral("DlibButton"));
-    FaceButton->setGeometry(QRect(0, 250, 51, 51));
+    FaceButton->setGeometry(QRect(0, 50, 51, 51));
     FaceButton->setToolTip(QStringLiteral("Automatically find new landmarks thanks to face detetction/recognition (l)"));
     FaceButton->setToolTipDuration(-1);
     QIcon FaceIcon;
@@ -132,38 +88,38 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     FaceButton->setIconSize(QSize(45, 45));
     QObject::connect(FaceButton,SIGNAL(pressed()),this,SLOT(DlibButtonPressed()));
 
-    RaycastHeadButton = new QPushButton(groupBox);
-    RaycastHeadButton->setObjectName(QStringLiteral("RaycastButton"));
-    RaycastHeadButton->setGeometry(QRect(0, 300, 51, 51));
-    RaycastHeadButton->setToolTip(QStringLiteral("Perform raycast to find new key points for the head (r)"));
-    RaycastHeadButton->setToolTipDuration(-1);
-    QIcon RaycastHeadIcon;
-    RaycastHeadIcon.addFile(QStringLiteral("Icons/HeadIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
-    RaycastHeadButton->setIcon(RaycastHeadIcon);
-    RaycastHeadButton->setIconSize(QSize(45, 45));
-    QObject::connect(RaycastHeadButton,SIGNAL(pressed()),this,SLOT(RaycastHeadButtonPressed()));
+    ToggleVisibilityButton = new QPushButton(groupBox);
+    ToggleVisibilityButton->setObjectName(QStringLiteral("ToggleVisibilityButton"));
+    ToggleVisibilityButton->setGeometry(QRect(0, 100, 51, 51));
+    ToggleVisibilityButton->setToolTip(QStringLiteral("Toggle aligned model visibility (v)"));
+    ToggleVisibilityButton->setToolTipDuration(-1);
+    QIcon ToggleVisibilityIcon;
+    ToggleVisibilityIcon.addFile(QStringLiteral("Icons/ToggleVisibilityIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
+    ToggleVisibilityButton->setIcon(ToggleVisibilityIcon);
+    ToggleVisibilityButton->setIconSize(QSize(45, 45));
+    QObject::connect(ToggleVisibilityButton,SIGNAL(pressed()),this,SLOT(ToggleVisibilityButtonPressed()));
 
-    RaycastButton = new QPushButton(groupBox);
-    RaycastButton->setObjectName(QStringLiteral("RaycastButton"));
-    RaycastButton->setGeometry(QRect(0, 350, 51, 51));
-    RaycastButton->setToolTip(QStringLiteral("Perform raycast to find new key points (r)"));
-    RaycastButton->setToolTipDuration(-1);
-    QIcon RaycastIcon;
-    RaycastIcon.addFile(QStringLiteral("Icons/RaycastIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
-    RaycastButton->setIcon(RaycastIcon);
-    RaycastButton->setIconSize(QSize(45, 45));
-    QObject::connect(RaycastButton,SIGNAL(pressed()),this,SLOT(RaycastButtonPressed()));
+    AlignButton = new QPushButton(groupBox);
+    AlignButton->setObjectName(QStringLiteral("AlignButton"));
+    AlignButton->setGeometry(QRect(0, 175, 51, 51));
+    AlignButton->setToolTip(QStringLiteral("Align models (t)"));
+    AlignButton->setToolTipDuration(-1);
+    QIcon AlignIcon;
+    AlignIcon.addFile(QStringLiteral("Icons/AlignIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
+    AlignButton->setIcon(AlignIcon);
+    AlignButton->setIconSize(QSize(45, 45));
+    QObject::connect(AlignButton,SIGNAL(pressed()),this,SLOT(AlignButtonPressed()));
 
-    RetextureButton = new QPushButton(groupBox);
-    RetextureButton->setObjectName(QStringLiteral("RetextureButton"));
-    RetextureButton->setGeometry(QRect(0, 400, 51, 51));
-    RetextureButton->setToolTip(QStringLiteral("Texture morphed model (x)"));
-    RetextureButton->setToolTipDuration(-1);
-    QIcon TextureIcon;
-    TextureIcon.addFile(QStringLiteral("Icons/TextureIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
-    RetextureButton->setIcon(TextureIcon);
-    RetextureButton->setIconSize(QSize(45, 45));
-    QObject::connect(RetextureButton,SIGNAL(pressed()),this,SLOT(RetextureButtonPressed()));
+    NextIterationButton = new QPushButton(groupBox);
+    NextIterationButton->setObjectName(QStringLiteral("NextIterationButton"));
+    NextIterationButton->setGeometry(QRect(0, 225, 51, 51));
+    NextIterationButton->setToolTip(QStringLiteral("Performs a new iteration of morphing"));
+    NextIterationButton->setToolTipDuration(-1);
+    QIcon NewIterationIcon;
+    NewIterationIcon.addFile(QStringLiteral("Icons/NewIteration.png"), QSize(), QIcon::Normal, QIcon::Off);
+    NextIterationButton->setIcon(NewIterationIcon);
+    NextIterationButton->setIconSize(QSize(45, 45));
+    QObject::connect(NextIterationButton,SIGNAL(pressed()),this,SLOT(NewIterationButtonPressed()));
 
     horizontalLayout->addWidget(groupBox);
 
@@ -346,58 +302,7 @@ void UserInterface::DrawButtonPressed()
     if(initializer->newmodelImported)
     {
         InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
-        interactor->ToggleDrawMode();
-
-        QIcon DrawIcon;
-
-        if(drawButtonOn)
-        {
-            drawButtonOn = false;
-            DrawIcon.addFile(QStringLiteral("Icons/DrawIconOff.png"), QSize(), QIcon::Normal, QIcon::Off);
-        }
-        else
-        {
-            drawButtonOn = true;
-            DrawIcon.addFile(QStringLiteral("Icons/DrawIconOn.png"), QSize(), QIcon::Normal, QIcon::Off);
-        }
-
-        DrawButton->setIcon(DrawIcon);
-    }
-}
-
-void UserInterface::AllButtonPressed()
-{
-    if(initializer->newmodelImported)
-    {
-        InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
-        interactor->DoAll();
-    }
-}
-
-void UserInterface::AlignButtonPressed()
-{
-    if(initializer->newmodelImported)
-    {
-        InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
-        interactor->AlignModels();
-    }
-}
-
-void UserInterface::ToggleVisibilityButtonPressed()
-{
-    if(initializer->newmodelImported)
-    {
-        InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
-        interactor->ToggleAlignedVisibility();
-    }
-}
-
-void UserInterface::MorphButtonPressed()
-{
-    if(initializer->newmodelImported)
-    {
-        InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
-        interactor->MorphModels();
+        interactor->ToggleDrawMode(DrawButton);
     }
 }
 
@@ -410,30 +315,30 @@ void UserInterface::DlibButtonPressed()
     }
 }
 
-void UserInterface::RaycastHeadButtonPressed()
+void UserInterface::ToggleVisibilityButtonPressed()
 {
     if(initializer->newmodelImported)
     {
         InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
-        interactor->RaycastHead();
+        interactor->ToggleAlignedVisibility();
     }
 }
 
-void UserInterface::RaycastButtonPressed()
+void UserInterface::AlignButtonPressed()
 {
     if(initializer->newmodelImported)
     {
         InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
-        interactor->CylinderRaycast();
+        interactor->AlignAndMorph();
     }
 }
 
-void UserInterface::RetextureButtonPressed()
+void UserInterface::NewIterationButtonPressed()
 {
     if(initializer->newmodelImported)
     {
         InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
-        interactor->TextureModels();
+        interactor->NewIteration();
     }
 }
 

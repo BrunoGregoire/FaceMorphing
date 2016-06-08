@@ -11,6 +11,7 @@
 #ifndef INTERACTORSTYLE_H
 #define INTERACTORSTYLE_H
 
+#include "qtIncludes.h"
 #include "vtkIncludes.h"
 
 #include "Content.h"
@@ -24,7 +25,7 @@
 #include "KeypointsManager.h"
 #include "Cutter.h"
 #include "Matcher.h"
-#include "Parameterizer.h"
+#include "StateManager.h"
 
 class InteractorStyle : public vtkInteractorStyleTrackballCamera
 {
@@ -43,10 +44,14 @@ public:
     Drawer* drawer;
     bool drawMode;
     Cutter* cutter;
+    StateManager* stateManager;
 
     bool isDrawing;
     double* drawOrigin;
     double* drawEnd;
+
+    bool addKeypointMode;
+    vtkIdType pickedId;
 
     vtkSmartPointer<vtkCellPicker> picker;
     vtkGlyphModel* glyph;
@@ -59,9 +64,10 @@ public:
     int symGlyphIndex;
     double* symPosition;
 
-
     vtk2DModel* currentShape;
     int currentArea;
+
+    int nbIterations;
 
     InteractorStyle();
 
@@ -84,10 +90,19 @@ public:
     void SaveKeypoints(std::string path);
     void ExportModel(std::string path);
     void ExportModelAndBS(std::string folderPath);
-    void UpdateText();
-    void DoAll();
-    void AlignModels();
+
+    QPushButton* drawButton;
+    void ToggleDrawMode(QPushButton* button);
     void ToggleAlignedVisibility();
+
+    void AlignAndMorph();
+    void NewIteration();
+
+    void DrawModeOn();
+    void DrawModeOff();
+    void AddKeypointOn();
+    void AddKeypointOff();
+    void UpdateText();
     void MorphModels();
     void TextureModels();
     void RaycastHead();
@@ -96,9 +111,9 @@ public:
     void CylinderRaycast(int precision);
     void FaceDetection();
     void ResetCameras();
-    void ToggleDrawMode();
     void CancelDrawing();
     void DrawCircle();
+    void SaveAddKeypoint();
     void InitCutPlane();
     void CutPlaneUp();
     void CutPlaneDown();

@@ -20,8 +20,10 @@ class Matcher
 {
 public:
 
-    static void MatchPerfecty(vtkMeshModel* firstModel, vtkMeshModel* secondModel);
+    static void MatchPerfectly(vtkMeshModel* firstModel, vtkMeshModel* secondMode, double tolerance);
+    static void MatchPerfectly(vtkMeshModel* firstModel, vtkMeshModel* secondModel);
     static void MatchInterpolated(vtkMeshModel* firstModel, vtkMeshModel* secondModel);
+    static void MatchWithCurvatures(vtkMeshModel* firstModel, vtkMeshModel* secondModel);
 };
 
 #endif

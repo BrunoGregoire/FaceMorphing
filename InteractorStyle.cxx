@@ -9,13 +9,18 @@ InteractorStyle::InteractorStyle()
 
     glyphSelected = false;
 
+    drawButton = NULL;
     drawMode = false;
     isDrawing = false;
+
+    addKeypointMode = false;
 
     symetricMode = true;
     symPosition = new double[3];
 
     currentArea = 0;
+
+    nbIterations = 0;
 }
 
 void InteractorStyle::SetContent(Content* _content)
@@ -26,6 +31,8 @@ void InteractorStyle::SetContent(Content* _content)
 
     content->text = vtkSmartPointer<vtkTextActor>::New();
     content->newmodelRenderer->AddActor(content->text);
+
+    stateManager = new StateManager(content);
 }
 
 void InteractorStyle::SetICP(ICP *_icp)
@@ -65,6 +72,9 @@ void InteractorStyle::SetCutter(Cutter *_cutter)
 
 void InteractorStyle::OnLeftButtonDown()
 {
+    int x = Interactor->GetEventPosition()[0];
+    int y = Interactor->GetEventPosition()[1];
+
     if(drawMode)
     {
         if(!isDrawing)
@@ -72,8 +82,8 @@ void InteractorStyle::OnLeftButtonDown()
             drawOrigin = new double[2];
             drawEnd = new double[2];
 
-            drawOrigin[0] = Interactor->GetEventPosition()[0];
-            drawOrigin[1] = Interactor->GetEventPosition()[1];
+            drawOrigin[0] = x;
+            drawOrigin[1] = y;
 
             currentShape = new vtk2DModel();
 
@@ -82,8 +92,8 @@ void InteractorStyle::OnLeftButtonDown()
         }
         else
         {
-            drawEnd[0] = Interactor->GetEventPosition()[0];
-            drawEnd[1] = Interactor->GetEventPosition()[1];
+            drawEnd[0] = x;
+            drawEnd[1] = y;
 
             if(currentArea<drawer->nbShapes)
             {
@@ -97,10 +107,23 @@ void InteractorStyle::OnLeftButtonDown()
             }
 
             if(currentArea == drawer->nbShapes)
-                drawMode = false;
+                DrawModeOff();
 
             isDrawing = false;
         }
+    }
+    else if(addKeypointMode)
+    {
+        picker->Pick(x,y,0,content->newmodelRenderer);
+        content->newModel->BuildKdTree();
+
+        pickedId = content->newModel->kdTree->FindClosestPoint(picker->GetPickPosition());
+
+        glyph->ClearPoints();
+        glyph->InsertNextID(pickedId);
+        glyph->UpdateGlyph();
+        glyph->ShowModel();
+        glyph->Render();
     }
     else
         vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
@@ -110,6 +133,7 @@ void InteractorStyle::OnRightButtonDown()
 {
     int x = Interactor->GetEventPosition()[0];
     int y = Interactor->GetEventPosition()[1];
+
     vtkSmartPointer<vtkCellPicker> tempPicker = vtkSmartPointer<vtkCellPicker>::New();
     tempPicker->Pick(x,y,0,content->newmodelRenderer);
 
@@ -119,6 +143,8 @@ void InteractorStyle::OnRightButtonDown()
 
         if(symetricMode)
             symGlyphIndex = KeypointsManager::GetSymmetric(glyphIndex);
+        else
+            symGlyphIndex = -1;
 
         if(glyphIndex != -1)
         {
@@ -145,7 +171,7 @@ void InteractorStyle::OnRightButtonDown()
             glyphSelected = true;
         }
         else
-          vtkInteractorStyleTrackballCamera::OnRightButtonDown();
+            vtkInteractorStyleTrackballCamera::OnRightButtonDown();
     }
     else
     {
@@ -235,80 +261,52 @@ void InteractorStyle::OnKeyPress()
 {
     vtkRenderWindowInteractor *rwi = this->Interactor;
     std::string key = rwi->GetKeySym();
+    char keyCode = rwi->GetKeyCode();
 
-    std::cout<<key<<std::endl;
-
-    if (key == "a")
-        DoAll();
-
-    if (key == "t")
-        AlignModels();
-
-    if (key == "v")
-        ToggleAlignedVisibility();
-
-    if (key == "m")
-        MorphModels();
-
-    if (key == "x")
-        TextureModels();
-
-    if (key == "h")
-        RaycastHead();
-
-    if (key == "r")
-        CylinderRaycast();
-
-    if (key == "d")
-        FaceDetection();
-
-    if (key == "c")
-        ResetCameras();
-
-    if (key == "Escape")
-        CancelDrawing();
-
-    if (key == "o")
-        ToggleDrawMode();
-
-    if (key == "y")
-        InitCutPlane();
-
-    if (key == "Up")
-        CutPlaneUp();
-
-    if (key == "Down")
-        CutPlaneDown();
-
-    if (key == "Return")
-        Cut();
-
-    if (key == "comma")
+    switch(keyCode)
     {
-        Matcher::MatchPerfecty(content->refModel,content->alignedModel);
+    case 't': AlignAndMorph(); break;
+
+    case 'v': ToggleAlignedVisibility(); break;
+
+    case 'm': MorphModels(); break;
+
+    case 'x': TextureModels(); break;
+
+    case 'h': RaycastHead(); break;
+
+    case 'r': CylinderRaycast(); break;
+
+    case 'd': FaceDetection(); break;
+
+    case 'c': ResetCameras(); break;
+
+    case 's': SaveAddKeypoint(); break;
+
+    case 'y': InitCutPlane(); break;
+
+    case 'w':
+        content->refModel->Smooth();
+        content->refModel->ComputeNormals();
+        content->refModel->Update();
         content->refModel->Render();
+    break;}
 
-        /*
-        vtkSmartPointer<vtkRenderWindow> tempRenderWindow =  vtkSmartPointer<vtkRenderWindow>::New();
-        vtkSmartPointer<vtkRenderer> tempRenderer = vtkSmartPointer<vtkRenderer>::New();
-        tempRenderWindow->AddRenderer(tempRenderer);
+    if(key == "Escape") CancelDrawing();
 
-        std::cout << "DEBUG -1" << std::endl;
-        vtkMeshModel* param = Parameterizer::PlanarParameterization(content->newModel);
-        std::cout << "DEBUG 11" << std::endl;
-        param->SetRenderer(tempRenderer);
-        param->SetRenderWindow(tempRenderWindow);
-        param->actor->GetProperty()->SetRepresentationToWireframe();
-        std::cout << "DEBUG 12" << std::endl;
-        param->ShowModel();
-        std::cout << "DEBUG 13" << std::endl;
-        param->Render();
-        std::cout << "DEBUG 14" << std::endl;
-        */
+    if(key == "Up") CutPlaneUp();
+
+    if(key == "Down") CutPlaneDown();
+
+    if(key == "Return") Cut();
+
+    if(key == "Comma")
+    {
+        Matcher::MatchPerfectly(content->refModel,content->alignedModel,20);
+        content->refModel->Triangulate();
+        content->refModel->Update();
+        content->refModel->Render();
     }
-
-    std::cout<<key<<std::endl;
-
 }
 
 void InteractorStyle::ExportBlendshapes(std::string folderPath)
@@ -327,6 +325,8 @@ void InteractorStyle::LoadKeypoints(std::string path)
         currentArea = 6;
     else if(content->newmodelKeypoints->GetNumberOfPoints() == 66)
         currentArea = 7;
+    else
+        currentArea = drawer->nbShapes;
 }
 
 void InteractorStyle::SaveKeypoints(std::string path)
@@ -355,41 +355,18 @@ void InteractorStyle::UpdateText()
         content->text->GetTextProperty()->SetColor(1.0, 1.0, 1.0);
     }
     else
-        content->newmodelRenderer->RemoveActor(content->text);
+        content->text->SetInput("");
 
      content->newmodelRenderWindow->Render();
 }
 
-void InteractorStyle::DoAll()
-{
-    if(content->refKeypoints->GetNumberOfPoints() == content->newmodelKeypoints->GetNumberOfPoints())
-    {
-        if(!icpDone)
-        {
-            AlignModels();
-            RaycastHead();
-            MorphModels();
-            //tpst->basis = tpst->Basis::R;
-        }
-
-        ToggleAlignedVisibility();
-
-        RaycastHead();
-        CylinderRaycast();
-        MorphModels();
-        TextureModels();
-
-        RaycastHead();
-        CylinderRaycast(2);
-        MorphModels();
-        TextureModels();
-    }
-}
-
-void InteractorStyle::AlignModels()
+void InteractorStyle::AlignAndMorph()
 {
     if(!icpDone)
     {
+        content->customNewmodelKeypoints = vtkSmartPointer<vtkIdList>::New();
+        content->customNewmodelKeypoints->DeepCopy(content->newmodelKeypoints->pointsIds);
+
         content->alignedKeypoints = icp->AlignAndCopy(content->newmodelKeypoints,content->refKeypoints,0);
         content->alignedKeypoints->SetRenderer(content->refRenderer);
         content->alignedKeypoints->SetRenderWindow(content->refRenderWindow);
@@ -404,7 +381,7 @@ void InteractorStyle::AlignModels()
         content->newModel->polyData = content->alignedModel->polyData;
         content->newModel->Update();
 
-        content->newmodelKeypoints->UpdatePoints();
+        content->newmodelKeypoints->ClearPoints();
         content->newmodelKeypoints->UpdateGlyph();
 
         icp->Align(content->refKeypoints,content->alignedKeypoints,1);
@@ -427,6 +404,27 @@ void InteractorStyle::AlignModels()
 
         icpDone = true;
         tpstReady = true;
+
+        MorphModels();
+        TextureModels();
+    }
+}
+
+void InteractorStyle::NewIteration()
+{
+    if(icpDone)
+    {
+        std::cout<<"Iteration no:"<<nbIterations<<std::endl;
+
+        RaycastHead();
+        if(nbIterations==0)
+            CylinderRaycast();
+        else
+            CylinderRaycast(2);
+        MorphModels();
+        TextureModels();
+
+        nbIterations++;
     }
 }
 
@@ -445,12 +443,21 @@ void InteractorStyle::MorphModels()
     {
         tpst->Morph(content->refKeypoints,content->alignedKeypoints);
 
-        content->refKeypoints->ClearPoints();
-        content->alignedKeypoints->ClearPoints();
-        content->refKeypoints->UpdateGlyph();
-        content->alignedKeypoints->UpdateGlyph();
+        if(!addKeypointMode)
+        {
+            content->refKeypoints->ClearPoints();
+            content->alignedKeypoints->ClearPoints();
+            content->newmodelKeypoints->ClearPoints();
+            content->refKeypoints->UpdateGlyph();
+            content->alignedKeypoints->UpdateGlyph();
+            content->newmodelKeypoints->UpdateGlyph();
+            content->refKeypoints->UpdateIdLabels();
+            content->alignedKeypoints->UpdateIdLabels();
+            content->newmodelKeypoints->UpdateIdLabels();
+        }
 
         content->refRenderWindow->Render();
+        content->newmodelRenderWindow->Render();
 
         tpstReady = false;
     }
@@ -519,20 +526,124 @@ void InteractorStyle::ResetCameras()
     content->newmodelRenderWindow->Render();
 }
 
-void InteractorStyle::ToggleDrawMode()
+void InteractorStyle::ToggleDrawMode(QPushButton *button)
 {
+    if(drawButton == NULL)
+        drawButton = button;
+
     if(drawMode)
     {
-        CancelDrawing();
-        content->text->SetInput("");
-        content->newmodelRenderWindow->Render();
-        drawMode = false;
+        DrawModeOff();
     }
     else if(currentArea<drawer->nbShapes)
     {
-        UpdateText();
-        drawMode = true;
+        DrawModeOn();
     }
+    else if(icpDone && !addKeypointMode)
+    {
+        AddKeypointOn();
+    }
+    else if(icpDone && addKeypointMode)
+    {
+        AddKeypointOff();
+    }
+
+}
+
+void InteractorStyle::DrawModeOff()
+{
+    if(drawButton)
+    {
+        QIcon icon;
+        icon.addFile(QStringLiteral("Icons/DrawIconOff.png"), QSize(), QIcon::Normal, QIcon::Off);
+        drawButton->setIcon(icon);
+    }
+
+    CancelDrawing();
+    content->text->SetInput("");
+    content->newmodelRenderWindow->Render();
+    drawMode = false;
+}
+void InteractorStyle::DrawModeOn()
+{
+    if(drawButton)
+    {
+        QIcon icon;
+        icon.addFile(QStringLiteral("Icons/DrawIconOn.png"), QSize(), QIcon::Normal, QIcon::Off);
+        drawButton->setIcon(icon);
+    }
+
+    UpdateText();
+    drawMode = true;
+}
+void InteractorStyle::AddKeypointOn()
+{
+    if(drawButton)
+    {
+        QIcon icon;
+        icon.addFile(QStringLiteral("Icons/DrawIconOn.png"), QSize(), QIcon::Normal, QIcon::Off);
+        drawButton->setIcon(icon);
+    }
+
+    addKeypointMode = true;
+
+    content->refKeypoints->pointsIds->DeepCopy(content->customRefKeypoints);
+    content->refKeypoints->UpdatePoints();
+    content->refKeypoints->UpdateGlyph();
+    content->refKeypoints->UpdateIdLabels();
+    content->refKeypoints->ShowModel();
+    content->refKeypoints->Render();
+
+    content->newmodelKeypoints->pointsIds->DeepCopy(content->customNewmodelKeypoints);
+    content->newmodelKeypoints->UpdatePoints();
+    content->newmodelKeypoints->UpdateGlyph();
+    content->newmodelKeypoints->UpdateIdLabels();
+    content->newmodelKeypoints->ShowModel();
+    content->newmodelKeypoints->Render();
+
+    content->alignedKeypoints->pointsIds->DeepCopy(content->customNewmodelKeypoints);
+    content->alignedKeypoints->UpdatePoints();
+    content->alignedKeypoints->UpdateGlyph();
+    content->alignedKeypoints->HideIdLabels();
+    content->alignedKeypoints->HideModel();
+
+    content->text->SetInput("Click to add an additional landmark");
+    content->text->SetPosition(0,0);
+    content->text->GetTextProperty()->SetFontSize(24);
+    content->text->GetTextProperty()->SetColor(1.0, 1.0, 1.0);
+    content->newmodelRenderWindow->Render();
+}
+void InteractorStyle::AddKeypointOff()
+{
+    if(drawButton)
+    {
+        QIcon icon;
+        icon.addFile(QStringLiteral("Icons/DrawIconOff.png"), QSize(), QIcon::Normal, QIcon::Off);
+        drawButton->setIcon(icon);
+    }
+
+    addKeypointMode = false;
+
+    content->refKeypoints->ClearPoints();
+    content->refKeypoints->UpdateGlyph();
+    content->refKeypoints->HideIdLabels();
+    content->refKeypoints->HideModel();
+    content->refKeypoints->Render();
+
+    content->newmodelKeypoints->ClearPoints();
+    content->newmodelKeypoints->UpdateGlyph();
+    content->newmodelKeypoints->HideIdLabels();
+    content->newmodelKeypoints->HideModel();
+    content->newmodelKeypoints->Render();
+
+    content->alignedKeypoints->ClearPoints();
+    content->alignedKeypoints->UpdateGlyph();
+    content->alignedKeypoints->HideIdLabels();
+    content->alignedKeypoints->HideModel();
+    content->alignedKeypoints->Render();
+
+    content->text->SetInput("");
+    content->newmodelRenderWindow->Render();
 }
 
 void InteractorStyle::CancelDrawing()
@@ -543,6 +654,32 @@ void InteractorStyle::CancelDrawing()
         currentShape->HideModel();
         currentShape->Render();
     }
+}
+
+void InteractorStyle::SaveAddKeypoint()
+{
+    glyph->ClearPoints();
+    glyph->UpdateGlyph();
+    glyph->HideModel();
+
+    content->newmodelKeypoints->InsertNextID(pickedId);
+    content->newmodelKeypoints->UpdateGlyph();
+    content->newmodelKeypoints->ShowModel();
+    content->newmodelKeypoints->UpdateIdLabels();
+    content->newmodelKeypoints->Render();
+
+    if(icpDone)
+    {
+        content->alignedKeypoints->InsertNextID(pickedId);
+        content->alignedKeypoints->UpdateGlyph();
+        content->alignedKeypoints->HideModel();
+        content->alignedKeypoints->HideIdLabels();
+
+        if(content->newmodelKeypoints->GetNumberOfPoints() == content->alignedKeypoints->GetNumberOfPoints())
+            tpstReady = true;
+    }
+
+    content->customNewmodelKeypoints->DeepCopy(content->newmodelKeypoints->pointsIds);
 }
 
 void InteractorStyle::InitCutPlane()

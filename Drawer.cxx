@@ -337,40 +337,43 @@ void Drawer::ProjectPoints(int area, vtkGlyphModel* glyphModel)
     glyphModel->Render();
 }
 
+int MinimumIndex(std::vector<int> vector)
+{
+    int min = -1;
+
+    if(vector.size()>0)
+    {
+        min = 0;
+        for(int i=1;i<vector.size();i++)
+        {
+            if(vector[i]<vector[min])
+                min = i;
+        }
+    }
+
+    return min;
+}
+
 void Drawer::ProjectSymetrics(std::vector<int> points,std::vector<double*> positions, vtkGlyphModel *glyphModel)
 {
     std::vector<int> syms;
     for(int i=0;i<points.size();i++)
     {
         syms.push_back(KeypointsManager::GetSymmetric(points[i]));
-        std::cout<<syms[0]<<std::endl;
+        std::cout<<points[i]<<","<<syms[syms.size()-1]<<std::endl;
     }
 
-    if(syms[0]<syms[1])
+    while(MinimumIndex(syms)!=-1)
     {
-        for(int i=0;i<syms.size();i++)
-        {
-            double* point = positions[i];
-            double symPoint[3];
-            symPoint[0] = -point[0];
-            symPoint[1] = point[1];
-            symPoint[2] = point[2];
-            vtkIdType symId = glyphModel->mesh->kdTree->FindClosestPoint(symPoint);
-            glyphModel->InsertNextID(symId);
-        }
+        int minIndex = MinimumIndex(syms);
+        double* point = positions[minIndex];
+        double symPoint[3];
+        symPoint[0] = -point[0];
+        symPoint[1] = point[1];
+        symPoint[2] = point[2];
+        vtkIdType symId = glyphModel->mesh->kdTree->FindClosestPoint(symPoint);
+        glyphModel->InsertNextID(symId);
+        syms.erase(syms.begin()+minIndex);
+        positions.erase(positions.begin()+minIndex);
     }
-    else
-    {
-        for(int i=syms.size()-1;i>=0;i--)
-        {
-            double* point = positions[i];
-            double symPoint[3];
-            symPoint[0] = -point[0];
-            symPoint[1] = point[1];
-            symPoint[2] = point[2];
-            vtkIdType symId = glyphModel->mesh->kdTree->FindClosestPoint(symPoint);
-            glyphModel->InsertNextID(symId);
-        }
-    }
-
 }
