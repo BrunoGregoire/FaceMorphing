@@ -104,8 +104,9 @@ void Raycaster::Cast(double *origin, double *end, vtkGlyphModel *firstKeypoints,
         secondKeypoints->InsertNextPoint(secondIntersecPoints->GetPoint(0));
     }
 
-    /*
+
     // Draw ray
+    /*
     vtkLineModel* ray = new vtkLineModel(origin,end);
     ray->UpdateLine();
     ray->SetRenderer(firstKeypoints->renderer);

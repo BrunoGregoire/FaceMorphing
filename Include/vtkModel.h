@@ -26,6 +26,8 @@ public:
     vtkSmartPointer<vtkRenderer> renderer;
     vtkSmartPointer<vtkRenderWindow> renderWindow;
 
+    std::vector<vtkModel*> linkedMeshes;
+
     vtkModel();
     void Update();
     void Render();

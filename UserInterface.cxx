@@ -1,7 +1,9 @@
 #include "UserInterface.h"
 
-void UserInterface::setupUi(QMainWindow *MainWindow)
+void UserInterface::setupUi(QMainWindow *_MainWindow)
 {
+    MainWindow = _MainWindow;
+
     if (MainWindow->objectName().isEmpty())
         MainWindow->setObjectName(QStringLiteral("MainWindow"));
     MainWindow->resize(1018, 776);
@@ -37,6 +39,10 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     actionExport_all = new QAction(MainWindow);
     actionExport_all->setObjectName(QStringLiteral("actionExport_all"));
     QObject::connect(actionExport_all,SIGNAL(triggered()),this,SLOT(ExportAllButtonPressed()));
+
+    actionParameters = new QAction(MainWindow);
+    actionParameters->setObjectName(QStringLiteral("actionParameters"));
+    QObject::connect(actionParameters,SIGNAL(triggered()),this,SLOT(StartParameters()));
 
     centralwidget = new QWidget(MainWindow);
     centralwidget->setObjectName(QStringLiteral("centralwidget"));
@@ -102,7 +108,7 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     AlignButton = new QPushButton(groupBox);
     AlignButton->setObjectName(QStringLiteral("AlignButton"));
     AlignButton->setGeometry(QRect(0, 175, 51, 51));
-    AlignButton->setToolTip(QStringLiteral("Align models (t)"));
+    AlignButton->setToolTip(QStringLiteral("Align and morph models"));
     AlignButton->setToolTipDuration(-1);
     QIcon AlignIcon;
     AlignIcon.addFile(QStringLiteral("Icons/AlignIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -120,6 +126,29 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     NextIterationButton->setIcon(NewIterationIcon);
     NextIterationButton->setIconSize(QSize(45, 45));
     QObject::connect(NextIterationButton,SIGNAL(pressed()),this,SLOT(NewIterationButtonPressed()));
+
+
+    PerfectMatchingButton = new QPushButton(groupBox);
+    PerfectMatchingButton->setObjectName(QStringLiteral("PerfectMatchingButton"));
+    PerfectMatchingButton->setGeometry(QRect(0, 275, 51, 51));
+    PerfectMatchingButton->setToolTip(QStringLiteral("Perfect matching"));
+    PerfectMatchingButton->setToolTipDuration(-1);
+    QIcon PerfectMatchingIcon;
+    PerfectMatchingIcon.addFile(QStringLiteral("Icons/MorphIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
+    PerfectMatchingButton->setIcon(PerfectMatchingIcon);
+    PerfectMatchingButton->setIconSize(QSize(45, 45));
+    QObject::connect(PerfectMatchingButton,SIGNAL(pressed()),this,SLOT(PerfectMatchingButtonPressed()));
+
+    ResetButton = new QPushButton(groupBox);
+    ResetButton->setObjectName(QStringLiteral("ResetButton"));
+    ResetButton->setGeometry(QRect(0, 350, 51, 51));
+    ResetButton->setToolTip(QStringLiteral("Reset both models"));
+    ResetButton->setToolTipDuration(-1);
+    QIcon ResetIcon;
+    ResetIcon.addFile(QStringLiteral("Icons/ResetIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
+    ResetButton->setIcon(ResetIcon);
+    ResetButton->setIconSize(QSize(45, 45));
+    QObject::connect(ResetButton,SIGNAL(pressed()),this,SLOT(ResetButtonPressed()));
 
     horizontalLayout->addWidget(groupBox);
 
@@ -143,12 +172,16 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     menubar->setGeometry(QRect(0, 0, 1018, 21));
     menuFile = new QMenu(menubar);
     menuFile->setObjectName(QStringLiteral("menuFile"));
+    menuTools = new QMenu(menubar);
+    menuTools->setObjectName(QStringLiteral("menuTools"));
     MainWindow->setMenuBar(menubar);
     statusbar = new QStatusBar(MainWindow);
     statusbar->setObjectName(QStringLiteral("statusbar"));
     MainWindow->setStatusBar(statusbar);
 
     menubar->addAction(menuFile->menuAction());
+    menubar->addAction(menuTools->menuAction());
+
     menuFile->addAction(actionImport);
     menuFile->addAction(actionImport_texture);
     menuFile->addAction(actionImport_all);
@@ -160,13 +193,17 @@ void UserInterface::setupUi(QMainWindow *MainWindow)
     menuFile->addAction(actionExport_blend_shapes);
     menuFile->addAction(actionExport_all);
 
+    menuTools->addAction(actionParameters);
+
     retranslateUi(MainWindow);
 
     QMetaObject::connectSlotsByName(MainWindow);
 }
 
-void UserInterface::retranslateUi(QMainWindow *MainWindow)
+void UserInterface::retranslateUi(QMainWindow *_MainWindow)
 {
+    MainWindow = _MainWindow;
+
     MainWindow->setWindowTitle(QApplication::translate("MainWindow", "FaceMorphing", 0));
     actionImport->setText(QApplication::translate("MainWindow", "Import model", 0));
     actionImport_texture->setText(QApplication::translate("MainWindow", "Import texture", 0));
@@ -176,9 +213,13 @@ void UserInterface::retranslateUi(QMainWindow *MainWindow)
     actionExport_model->setText(QApplication::translate("MainWindow", "Export model", 0));
     actionExport_blend_shapes->setText(QApplication::translate("MainWindow", "Export blend shapes", 0));
     actionExport_all->setText(QApplication::translate("MainWindow", "Export all", 0));
+
+    actionParameters->setText(QApplication::translate("MainWindow","Parameters",0));
+
     groupBox->setTitle(QString());
 
     menuFile->setTitle(QApplication::translate("MainWindow", "File", 0));
+    menuTools->setTitle(QApplication::translate("MainWindow", "Tools",0));
 }
 
 void UserInterface::ImportButtonPressed()
@@ -297,12 +338,22 @@ void UserInterface::ExportAllButtonPressed()
     }
 }
 
+void UserInterface::StartParameters()
+{
+    QDialog* paramDialog = new QDialog;
+    Ui_Parameters* ui_Parameters = new Ui_Parameters;
+    ui_Parameters->initializer = initializer;
+    ui_Parameters->setupUi(paramDialog);
+    paramDialog->show();
+}
+
 void UserInterface::DrawButtonPressed()
 {
     if(initializer->newmodelImported)
     {
         InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
         interactor->ToggleDrawMode(DrawButton);
+        drawButtonOn = !drawButtonOn;
     }
 }
 
@@ -339,6 +390,34 @@ void UserInterface::NewIterationButtonPressed()
     {
         InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
         interactor->NewIteration();
+    }
+}
+
+void UserInterface::PerfectMatchingButtonPressed()
+{
+    if(initializer->newmodelImported)
+    {
+        InteractorStyle* interactor = dynamic_cast<InteractorStyle*>(initializer->content->style.GetPointer());
+        interactor->MatchPerfectly();
+    }
+}
+
+void UserInterface::ResetButtonPressed()
+{
+    if(initializer->newmodelImported)
+    {
+        if(drawButtonOn)
+            DrawButtonPressed();
+
+        initializer->Init();
+        initializer->InitNewModel(initializer->newmodelFileName);
+        initializer->InitNewModelTexture(initializer->newmodelTextureFileName);
+
+        RefQvtkWidget->SetRenderWindow(initializer->content->refRenderWindow);
+        RefQvtkWidget->GetRenderWindow()->Render();
+
+        NewmodelQvtkWidget->SetRenderWindow(initializer->content->newmodelRenderWindow);
+        NewmodelQvtkWidget->GetRenderWindow()->Render();
     }
 }
 

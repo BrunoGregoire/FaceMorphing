@@ -29,6 +29,7 @@ include_directories("Include")
 #add src
 add_executable(FaceMorphing MACOSX_BUNDLE Main
     UserInterface
+    Ui_Parameters
     vtkModel
     vtkMeshModel
     vtkGlyphModel

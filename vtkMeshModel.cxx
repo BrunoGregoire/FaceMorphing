@@ -41,6 +41,20 @@ void vtkMeshModel::ExportAsOBJ(std::string fileName)
     objExporter->SetFilePrefix(fileName.c_str());
     objExporter->Write();
     renderWindow->Finalize();
+
+    if(linkedMeshes.size()!=0)
+    {
+        int folderLength = fileName.find_last_of('/');
+        std::string folderPath = fileName.substr(0,folderLength);
+        std::cout<<"Folder path : "<<folderPath<<std::endl;
+
+        for(int i=0;i<linkedMeshes.size();i++)
+        {
+            vtkMeshModel* linkedMesh = (vtkMeshModel*)(linkedMeshes[i]);
+            linkedMesh->ExportAsOBJ(folderPath+'/'+linkedMesh->name);
+            std::cout<<"Export linked mesh : "<<folderPath+'/'+linkedMesh->name<<std::endl;
+        }
+    }
 }
 
 void vtkMeshModel::ReadTexture(std::string fileName)
@@ -183,6 +197,24 @@ void vtkMeshModel::LoadBlendshapes(std::string folderPath)
 
         blendshapes.push_back(objReader->GetOutput());
     }
+}
+
+void vtkMeshModel::ApplyTransMat(vtkSmartPointer<vtkMatrix4x4> transMat)
+{
+    vtkModel::ApplyTransMat(transMat);
+
+    vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
+    transform->SetMatrix(transMat);
+    transform->Update();
+
+    TransformBlendshapes(transform);
+}
+
+void vtkMeshModel::ApplyTransform(vtkSmartPointer<vtkAbstractTransform> transform)
+{
+    vtkModel::ApplyTransform(transform);
+
+    TransformBlendshapes(transform);
 }
 
 void vtkMeshModel::TransformBlendshapes(vtkSmartPointer<vtkAbstractTransform> transform)

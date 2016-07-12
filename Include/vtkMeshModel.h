@@ -20,6 +20,8 @@
 class vtkMeshModel : public vtkModel
 {
 public:
+    std::string name;
+
     vtkSmartPointer<vtkTexture> texture;
 
     vtkSmartPointer<vtkKdTreePointLocator> kdTree;
@@ -32,8 +34,6 @@ public:
 
     std::vector<std::string> bsNames;
     std::vector<vtkSmartPointer<vtkPolyData>> blendshapes;
-
-    std::vector<vtkMeshModel*> linkedMeshes;
 
     vtkSmartPointer<vtkDataArray> curvatures;
 
@@ -52,6 +52,8 @@ public:
     void ComputeAxisTransform();
     double* TransformAlongAxis(double* point);
     void LoadBlendshapes(std::string folderPath);
+    void ApplyTransMat(vtkSmartPointer<vtkMatrix4x4> transMat);
+    void ApplyTransform(vtkSmartPointer<vtkAbstractTransform> transform);
     void TransformBlendshapes(vtkSmartPointer<vtkAbstractTransform> transform);
     void ExportBlendshapes(std::string folderPath);
     void TextureBlendshapes();

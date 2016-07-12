@@ -12,6 +12,7 @@
 #define INITIALIZER_H
 
 #include "vtkIncludes.h"
+#include "qtIncludes.h"
 
 #include "vtkModel.h"
 #include "Content.h"
@@ -37,13 +38,23 @@ public:
     Drawer* drawer;
     Cutter* cutter;
 
+    // Parameters
+    int* raycastLevel;
+    bool* eyesAndJaw;
+    bool* symMode;
+
     bool newmodelImported;
+
+    std::string newmodelFileName;
+    std::string newmodelTextureFileName;
 
     Initializer();
 
     void Init();
     void InitNewModel(std::string fileName);
     void InitNewModelTexture(std::string fileName);
+
+    void Reset();
 };
 
 #endif

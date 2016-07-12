@@ -46,6 +46,9 @@ public:
     Cutter* cutter;
     StateManager* stateManager;
 
+    int* raycastLevel;
+    bool* symMode;
+
     bool isDrawing;
     double* drawOrigin;
     double* drawEnd;
@@ -58,7 +61,6 @@ public:
     bool glyphSelected;
     int glyphIndex;
 
-    bool symetricMode;
     vtkGlyphModel* symGlyph;
     bool symGlyphSelected;
     int symGlyphIndex;
@@ -79,11 +81,16 @@ public:
     void SetFaceDetector (FaceDetector* _faceDetector);
     void SetDrawer (Drawer* _drawer);
     void SetCutter (Cutter* _cutter);
+    void SetParameters(int* _raycastLevel, bool* _symMode);
+
+    void UpdateParameters();
 
     void OnLeftButtonDown();
     void OnRightButtonDown();
     void OnMouseMove();
     void OnKeyPress();
+
+    void SetCurrentCursor();
 
     void ExportBlendshapes(std::string folderPath);
     void LoadKeypoints(std::string path);
@@ -97,6 +104,7 @@ public:
 
     void AlignAndMorph();
     void NewIteration();
+    void MatchPerfectly();
 
     void DrawModeOn();
     void DrawModeOff();

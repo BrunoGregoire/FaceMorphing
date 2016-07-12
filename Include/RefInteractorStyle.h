@@ -12,6 +12,7 @@
 #define REFINTERACTORSTYLE_H
 
 #include "vtkIncludes.h"
+#include "qtIncludes.h"
 
 #include "Content.h"
 #include "InteractorStyle.h"
@@ -24,15 +25,26 @@ public:
 
     Content* content;
 
+    bool* eyesAndJaw;
+
     bool selectionPossible;
     vtkSmartPointer<vtkCellPicker> picker;
     vtkIdType pickedId;
     vtkGlyphModel* glyph;
 
     RefInteractorStyle();
+
+    void SetContent(Content* _content);
+    void SetParameters(bool* _eyesAndJaw);
+
+    void UpdateParameters();
+
     void OnLeftButtonDown();
     void OnKeyPress();
-    void SetContent(Content* _content);
+    void OnMouseMove();
+
+    void SetCurrentCursor();
+
     void CheckSelectionPossible();
     void SaveAddKeypoint();
     void MorphModels();

@@ -15,7 +15,6 @@ InteractorStyle::InteractorStyle()
 
     addKeypointMode = false;
 
-    symetricMode = true;
     symPosition = new double[3];
 
     currentArea = 0;
@@ -70,63 +69,82 @@ void InteractorStyle::SetCutter(Cutter *_cutter)
     cutter = _cutter;
 }
 
+void InteractorStyle::SetParameters(int *_raycastLevel, bool* _symMode)
+{
+    raycastLevel = _raycastLevel;
+    symMode = _symMode;
+}
+
+void InteractorStyle::UpdateParameters()
+{
+
+}
+
 void InteractorStyle::OnLeftButtonDown()
 {
     int x = Interactor->GetEventPosition()[0];
     int y = Interactor->GetEventPosition()[1];
 
-    if(drawMode)
+    if(Interactor->GetControlKey() != 0)
     {
-        if(!isDrawing)
-        {
-            drawOrigin = new double[2];
-            drawEnd = new double[2];
-
-            drawOrigin[0] = x;
-            drawOrigin[1] = y;
-
-            currentShape = new vtk2DModel();
-
-            isDrawing = true;
-
-        }
-        else
-        {
-            drawEnd[0] = x;
-            drawEnd[1] = y;
-
-            if(currentArea<drawer->nbShapes)
-            {
-                drawer->SaveArea(currentShape,currentArea);
-                drawer->ProjectPoints(currentArea,content->newmodelKeypoints);
-                currentShape->HideModel();
-                content->newmodelKeypoints->UpdateIdLabels();
-                content->newmodelKeypoints->Render();
-                currentArea++;
-                UpdateText();
-            }
-
-            if(currentArea == drawer->nbShapes)
-                DrawModeOff();
-
-            isDrawing = false;
-        }
-    }
-    else if(addKeypointMode)
-    {
-        picker->Pick(x,y,0,content->newmodelRenderer);
-        content->newModel->BuildKdTree();
-
-        pickedId = content->newModel->kdTree->FindClosestPoint(picker->GetPickPosition());
-
-        glyph->ClearPoints();
-        glyph->InsertNextID(pickedId);
-        glyph->UpdateGlyph();
-        glyph->ShowModel();
-        glyph->Render();
+        StartRotate();
     }
     else
-        vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
+    {
+        if(Interactor->GetControlKey() == 0 && State == VTKIS_ROTATE)
+            EndRotate();
+
+        if(drawMode)
+        {
+            if(!isDrawing)
+            {
+                drawOrigin = new double[2];
+                drawEnd = new double[2];
+
+                drawOrigin[0] = x;
+                drawOrigin[1] = y;
+
+                currentShape = new vtk2DModel();
+
+                isDrawing = true;
+
+            }
+            else
+            {
+                drawEnd[0] = x;
+                drawEnd[1] = y;
+
+                if(currentArea<drawer->nbShapes)
+                {
+                    drawer->SaveArea(currentShape,currentArea);
+                    drawer->ProjectPoints(currentArea,content->newmodelKeypoints);
+                    currentShape->HideModel();
+                    content->newmodelKeypoints->UpdateIdLabels();
+                    content->newmodelKeypoints->Render();
+                    currentArea++;
+                    UpdateText();
+                }
+
+                if(currentArea == drawer->nbShapes)
+                    DrawModeOff();
+
+                isDrawing = false;
+            }
+        }
+        else if(addKeypointMode)
+        {
+            picker->Pick(x,y,0,content->newmodelRenderer);
+            content->newModel->BuildKdTree();
+
+            pickedId = content->newModel->kdTree->FindClosestPoint(picker->GetPickPosition());
+
+            glyph->ClearPoints();
+            glyph->InsertNextID(pickedId);
+            glyph->UpdateGlyph();
+            glyph->ShowModel();
+            glyph->Render();
+        }
+    }
 }
 
 void InteractorStyle::OnRightButtonDown()
@@ -141,7 +159,7 @@ void InteractorStyle::OnRightButtonDown()
     {
         glyphIndex = content->newmodelKeypoints->FindClosestPoint(tempPicker->GetPickPosition(),20);
 
-        if(symetricMode)
+        if(*symMode)
             symGlyphIndex = KeypointsManager::GetSymmetric(glyphIndex);
         else
             symGlyphIndex = -1;
@@ -169,6 +187,7 @@ void InteractorStyle::OnRightButtonDown()
 
             content->newmodelKeypoints->Render();
             glyphSelected = true;
+            OnMouseMove();
         }
         else
             vtkInteractorStyleTrackballCamera::OnRightButtonDown();
@@ -211,6 +230,8 @@ void InteractorStyle::OnRightButtonDown()
 
 void InteractorStyle::OnMouseMove()
 {
+    SetCurrentCursor();
+
     if(glyphSelected)
     {
         int x = Interactor->GetEventPosition()[0];
@@ -225,7 +246,7 @@ void InteractorStyle::OnMouseMove()
         glyph->ShowModel();
         glyph->Render();
 
-        if(symetricMode && symGlyphIndex != -1)
+        if(*symMode && symGlyphIndex != -1)
         {
             symPosition[0] = -picker->GetPickPosition()[0];
             symPosition[1] = picker->GetPickPosition()[1];
@@ -309,6 +330,19 @@ void InteractorStyle::OnKeyPress()
     }
 }
 
+void InteractorStyle::SetCurrentCursor()
+{
+    if(State == VTKIS_ROTATE)
+        QApplication::setOverrideCursor(Qt::ClosedHandCursor);
+    else if(Interactor->GetControlKey() != 0)
+        QApplication::setOverrideCursor(Qt::OpenHandCursor);
+    else if(drawMode || addKeypointMode)
+        QApplication::setOverrideCursor(Qt::CrossCursor);
+    else
+        QApplication::setOverrideCursor(Qt::ArrowCursor);
+    QApplication::processEvents();
+}
+
 void InteractorStyle::ExportBlendshapes(std::string folderPath)
 {
     content->refModel->ExportBlendshapes(folderPath);
@@ -362,7 +396,7 @@ void InteractorStyle::UpdateText()
 
 void InteractorStyle::AlignAndMorph()
 {
-    if(!icpDone)
+    if(!icpDone && content->refKeypoints->GetNumberOfPoints() == content->newmodelKeypoints->GetNumberOfPoints())
     {
         content->customNewmodelKeypoints = vtkSmartPointer<vtkIdList>::New();
         content->customNewmodelKeypoints->DeepCopy(content->newmodelKeypoints->pointsIds);
@@ -370,12 +404,16 @@ void InteractorStyle::AlignAndMorph()
         content->alignedKeypoints = icp->AlignAndCopy(content->newmodelKeypoints,content->refKeypoints,0);
         content->alignedKeypoints->SetRenderer(content->refRenderer);
         content->alignedKeypoints->SetRenderWindow(content->refRenderWindow);
+        content->alignedKeypoints->glyphColor[0] = 0;
+        content->alignedKeypoints->glyphColor[1] = 1;
+        content->alignedKeypoints->glyphColor[2] = 0;
+        content->alignedKeypoints->UpdateGlyph();
         content->alignedKeypoints->ShowModel();
 
         content->alignedModel = content->alignedKeypoints->mesh;
         content->alignedModel->SetRenderer(content->refRenderer);
         content->alignedModel->SetRenderWindow(content->refRenderWindow);
-        content->alignedModel->actor->GetProperty()->SetOpacity(0.5);
+        content->alignedModel->actor->GetProperty()->SetOpacity(0.7);
         content->alignedModel->ShowModel();
 
         content->newModel->polyData = content->alignedModel->polyData;
@@ -416,15 +454,28 @@ void InteractorStyle::NewIteration()
     {
         std::cout<<"Iteration no:"<<nbIterations<<std::endl;
 
+        if(addKeypointMode)
+            AddKeypointOff();
+
         RaycastHead();
-        if(nbIterations==0)
-            CylinderRaycast();
-        else
-            CylinderRaycast(2);
+        CylinderRaycast(*raycastLevel);
         MorphModels();
         TextureModels();
 
         nbIterations++;
+    }
+}
+
+void InteractorStyle::MatchPerfectly()
+{
+    if(icpDone && nbIterations>0)
+    {
+        Matcher::MatchPerfectly(content->refModel,content->alignedModel,20);
+        content->refModel->Triangulate();
+        content->refModel->Update();
+        content->refModel->Render();
+
+        TextureModels();
     }
 }
 
@@ -623,6 +674,8 @@ void InteractorStyle::AddKeypointOff()
     }
 
     addKeypointMode = false;
+
+    glyph->HideModel();
 
     content->refKeypoints->ClearPoints();
     content->refKeypoints->UpdateGlyph();

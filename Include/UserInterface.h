@@ -14,6 +14,7 @@
 
 #include "qtIncludes.h"
 
+#include "Ui_Parameters.h"
 #include "Initializer.h"
 
 class UserInterface : QObject
@@ -23,6 +24,8 @@ class UserInterface : QObject
 public:
     Initializer* initializer;
 
+    QMainWindow *MainWindow;
+
     QAction *actionImport;
     QAction *actionImport_texture;
     QAction *actionImport_all;
@@ -31,6 +34,8 @@ public:
     QAction *actionExport_model;
     QAction *actionExport_blend_shapes;
     QAction *actionExport_all;
+
+    QAction *actionParameters;
 
     QWidget *centralwidget;
     QGridLayout *gridLayout;
@@ -46,16 +51,20 @@ public:
 
     QPushButton *AlignButton;
     QPushButton *NextIterationButton;
+    QPushButton *PerfectMatchingButton;
+
+    QPushButton *ResetButton;
 
     QVTKWidget *RefQvtkWidget;
     QVTKWidget *NewmodelQvtkWidget;
 
     QMenuBar *menubar;
     QMenu *menuFile;
+    QMenu *menuTools;
     QStatusBar *statusbar;
 
-    void setupUi(QMainWindow *MainWindow);
-    void retranslateUi(QMainWindow *MainWindow);
+    void setupUi(QMainWindow *_MainWindow);
+    void retranslateUi(QMainWindow *_MainWindow);
 
 public slots:
 
@@ -68,12 +77,17 @@ public slots:
     void ExportBsButtonPressed();
     void ExportAllButtonPressed();
 
+    void StartParameters();
+
     void DrawButtonPressed();
     void DlibButtonPressed();
     void ToggleVisibilityButtonPressed();
 
     void AlignButtonPressed();
     void NewIterationButtonPressed();
+    void PerfectMatchingButtonPressed();
+
+    void ResetButtonPressed();
 };
 #endif
 

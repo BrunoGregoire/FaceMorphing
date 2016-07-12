@@ -10,6 +10,13 @@ Initializer::Initializer()
     faceDetector = new FaceDetector("Resources/shape_predictor_68_face_landmarks.dat");
     drawer = new Drawer();
     cutter = new Cutter();
+
+    raycastLevel = new int;
+    *raycastLevel = 1;
+    eyesAndJaw = new bool;
+    *eyesAndJaw = true;
+    symMode = new bool;
+    *symMode = true;
 }
 
 void Initializer::Init()
@@ -23,14 +30,67 @@ void Initializer::Init()
     // INIT REF MODEL
     content->refModel = new vtkMeshModel();
     content->refModel->ReadFromOBJ("Models/Ref/Ref.obj");
+    content->refModel->name = "RefModel";
+
+    content->refLeftEyeModel = new vtkMeshModel();
+    content->refLeftEyeModel->ReadFromOBJ("Models/Ref/EyeLeft_Mesh.obj");
+    content->refLeftEyeModel->name = "EyeLeft_Mesh";
+
+    content->refRightEyeModel = new vtkMeshModel();
+    content->refRightEyeModel->ReadFromOBJ("Models/Ref/EyeRight_Mesh.obj");
+    content->refRightEyeModel->name = "EyeRight_Mesh";
+
+    content->refJawUpModel = new vtkMeshModel();
+    content->refJawUpModel->ReadFromOBJ("Models/Ref/UpperTeeth_Mesh.obj");
+    content->refJawUpModel->name = "UpperTeeth_Mesh";
+
+    content->refJawDownModel = new vtkMeshModel();
+    content->refJawDownModel->ReadFromOBJ("Models/Ref/Jaw_Mesh.obj");
+    content->refJawDownModel->name = "Jaw_Mesh";
+
+    content->refModel->AddLink(content->refLeftEyeModel);
+    content->refModel->AddLink(content->refRightEyeModel);
+    content->refModel->AddLink(content->refJawUpModel);
+    content->refModel->AddLink(content->refJawDownModel);
+
     content->refModel->Center();
     content->refModel->BuildKdTree();
     content->refModel->Update();
+
     content->refModel->ReadTexture("Models/Ref/Textures/Ref.jpg");
     content->refModel->Update();
+
+    content->refLeftEyeModel->ReadTexture("Models/Ref/Textures/RefEye.jpg");
+    content->refLeftEyeModel->Update();
+
+    content->refRightEyeModel->ReadTexture("Models/Ref/Textures/RefEye.jpg");
+    content->refRightEyeModel->Update();
+
+    content->refJawUpModel->ReadTexture("Models/Ref/Textures/Ref.jpg");
+    content->refJawUpModel->Update();
+
+    content->refJawDownModel->ReadTexture("Models/Ref/Textures/Ref.jpg");
+    content->refJawDownModel->Update();
+
     content->refModel->SetRenderer(content->refRenderer);
     content->refModel->SetRenderWindow(content->refRenderWindow);
     content->refModel->ShowModel();
+
+    content->refLeftEyeModel->SetRenderer(content->refRenderer);
+    content->refLeftEyeModel->SetRenderWindow(content->refRenderWindow);
+    content->refLeftEyeModel->ShowModel();
+
+    content->refRightEyeModel->SetRenderer(content->refRenderer);
+    content->refRightEyeModel->SetRenderWindow(content->refRenderWindow);
+    content->refRightEyeModel->ShowModel();
+
+    content->refJawUpModel->SetRenderer(content->refRenderer);
+    content->refJawUpModel->SetRenderWindow(content->refRenderWindow);
+    content->refJawUpModel->ShowModel();
+
+    content->refJawDownModel->SetRenderer(content->refRenderer);
+    content->refJawDownModel->SetRenderWindow(content->refRenderWindow);
+    content->refJawDownModel->ShowModel();
 
     // INIT REF BLENDSHAPES
     content->refModel->bsNames.push_back("BrowsD_L");
@@ -153,6 +213,7 @@ void Initializer::Init()
     content->refInteractor->SetRenderWindow(content->refRenderWindow);
     vtkSmartPointer<RefInteractorStyle> refStyle = vtkSmartPointer<RefInteractorStyle>::New();
     refStyle->SetContent(content);
+    refStyle->SetParameters(eyesAndJaw);
     content->refInteractor->SetInteractorStyle(refStyle);
 
     newmodelImported = false;
@@ -160,11 +221,14 @@ void Initializer::Init()
 
 void Initializer::InitNewModel(std::string fileName)
 {
+    newmodelFileName = fileName;
+
     // INIT NEW MODEL RENDERER AND RENDER WINDOW
     content->newmodelRenderer = vtkSmartPointer<vtkRenderer>::New();
     content->newmodelRenderer->SetBackground(.3, .3, .3);
     content->newmodelRenderWindow = vtkSmartPointer<vtkRenderWindow>::New();
     content->newmodelRenderWindow->AddRenderer(content->newmodelRenderer);
+
 
     // INIT NEW MODEL
     content->newModel = new vtkMeshModel();
@@ -197,6 +261,7 @@ void Initializer::InitNewModel(std::string fileName)
     style->SetFaceDetector(faceDetector);
     style->SetDrawer(drawer);
     style->SetCutter(cutter);
+    style->SetParameters(raycastLevel,symMode);
     content->newmodelInteractor->SetInteractorStyle(style);
     content->style = style;
 
@@ -205,6 +270,8 @@ void Initializer::InitNewModel(std::string fileName)
 
 void Initializer::InitNewModelTexture(std::string fileName)
 {
+    newmodelTextureFileName = fileName;
+
     // INIT NEW MODEL TEXTURE
     content->newModel->ReadTexture(fileName);
     content->newModel->Update();

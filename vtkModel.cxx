@@ -63,6 +63,11 @@ void vtkModel::ApplyTransMat(vtkSmartPointer<vtkMatrix4x4> transMat)
     transformFilter->Update();
 
     polyData = transformFilter->GetOutput();
+
+    for(int i=0;i<linkedMeshes.size();i++)
+    {
+        linkedMeshes[i]->ApplyTransMat(transMat);
+    }
 }
 
 void vtkModel::ApplyTransform(vtkSmartPointer<vtkAbstractTransform> transform)
@@ -73,6 +78,11 @@ void vtkModel::ApplyTransform(vtkSmartPointer<vtkAbstractTransform> transform)
     transformFilter->Update();
 
     polyData = transformFilter->GetOutput();
+
+    for(int i=0;i<linkedMeshes.size();i++)
+    {
+        linkedMeshes[i]->ApplyTransform(transform);
+    }
 }
 
 vtkSmartPointer<vtkPolyData> vtkModel::TransformPolyData(vtkSmartPointer<vtkMatrix4x4> transMat)

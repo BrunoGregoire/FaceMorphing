@@ -27,9 +27,6 @@ void TPST::Morph(vtkGlyphModel *sourceKeypoints, vtkGlyphModel *targetKeypoints)
     sourceKeypoints->mesh->Update();
     sourceKeypoints->mesh->Render();
 
-    if(!sourceKeypoints->mesh->blendshapes.empty())
-        sourceKeypoints->mesh->TransformBlendshapes(tpst);
-
     sourceKeypoints->UpdatePoints();
     sourceKeypoints->UpdateGlyph();
 }

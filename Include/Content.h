@@ -21,6 +21,11 @@ class Content
 {
 public:
     vtkMeshModel* refModel;
+    vtkMeshModel* refLeftEyeModel;
+    vtkMeshModel* refRightEyeModel;
+    vtkMeshModel* refJawUpModel;
+    vtkMeshModel* refJawDownModel;
+
     vtkMeshModel* newModel;
     vtkMeshModel* alignedModel;
 
